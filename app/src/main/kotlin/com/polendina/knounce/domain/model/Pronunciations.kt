@@ -1,4 +1,4 @@
-package trancore.corelib.pronunciation.utils.responsesdataclasses
+package com.polendina.knounce.domain.model
 
 /**
  * A data class representing the available pronunciations response.
@@ -45,44 +45,5 @@ data class Pronunciations(
                 val realogg: String
             )
         }
-    }
-}
-
-/**
- * A data class representing the language codes' response.
- */
-data class LanguageCodes (
-    val status: String,
-    val attributes: Attributes,
-    val items: List<Item>
-) {
-    data class Attributes (
-        val total: Int
-    )
-    data class Item (
-        val code: String,
-        val en: String,
-        val language: String
-    )
-}
-
-/**
- * A data class representing the from-to language codes response.
- */
-data class FromToResponse(
-    val status: String,
-    val response: List<Response>
-) {
-    data class Response(
-        val father: Father,
-        val children: List<Child>
-    ) {
-        data class Father (
-            val name: String
-        )
-        data class Child(
-            val pairName: String,
-            val value: String
-        )
     }
 }

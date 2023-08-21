@@ -18,11 +18,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.polendina.knounce.presentation.pronunciationsscreen.Pronunciation
+import com.polendina.knounce.domain.model.Pronunciations
 
 @Composable
-fun PronunciationCard(
-    pronunciation: Pronunciation,
+internal fun PronunciationCard(
+    pronunciation: Pronunciations.Datum.Item,
+    onPlayButtonClickCallback: (mediaUrl: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card (
@@ -34,17 +35,23 @@ fun PronunciationCard(
         Row (
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(
+                onClick = {
+                    onPlayButtonClickCallback(pronunciation.standard_pronunciation.realmp3)
+                }
+            ) {
                 Icon(imageVector = Icons.Outlined.PlayArrow, contentDescription = null, tint = Color.Blue)
             }
             Column {
-                Text(text = pronunciation.title, style = TextStyle(
+                Text(text = pronunciation.original, style = TextStyle(
                     fontWeight = FontWeight.SemiBold
                 )
                 )
-                Text(text = pronunciation.description, style = TextStyle(
-                    fontWeight = FontWeight.Light
-                )
+                Text(
+                    text = pronunciation.num_pronunciations,
+                    style = TextStyle(
+                        fontWeight = FontWeight.Light
+                    )
                 )
             }
         }

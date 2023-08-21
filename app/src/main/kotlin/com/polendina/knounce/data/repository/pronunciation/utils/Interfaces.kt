@@ -1,11 +1,11 @@
 package trancore.corelib.pronunciation
 
 import com.google.gson.JsonObject
+import com.polendina.knounce.domain.model.FromToResponse
+import com.polendina.knounce.domain.model.LanguageCodes
+import com.polendina.knounce.domain.model.Pronunciations
 import retrofit2.Call
 import retrofit2.http.GET
-import trancore.corelib.pronunciation.utils.responsesdataclasses.FromToResponse
-import trancore.corelib.pronunciation.utils.responsesdataclasses.LanguageCodes
-import trancore.corelib.pronunciation.utils.responsesdataclasses.Pronunciations
 
 interface Responses {
     @GET(".")
