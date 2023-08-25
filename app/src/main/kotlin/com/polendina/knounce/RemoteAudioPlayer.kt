@@ -27,8 +27,8 @@ object PronunciationPlayer {
             reset()
             setDataSource(url)
             prepare()
+            start()
         }
-        mediaPlayer.start()
     }
 
     private val audioQueue = mutableListOf<String>()

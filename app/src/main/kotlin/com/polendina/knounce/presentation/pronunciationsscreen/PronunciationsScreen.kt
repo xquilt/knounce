@@ -27,6 +27,7 @@ import com.polendina.knounce.presentation.pronunciationsscreen.PronunciationsVie
 import com.polendina.knounce.presentation.pronunciationsscreen.components.homescreen.PronunciationCard
 
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.polendina.knounce.presentation.pronunciationsscreen.pronunciations
 
 @Composable
 fun PronunciationsScreen(
@@ -54,15 +55,26 @@ fun PronunciationsScreen(
                 .padding(vertical = 10.dp)
                 .height(70.dp)
         )
-        LanguagesRow(languages = pronunciationsViewModel.languages)
+        LanguagesRow(
+            languages = pronunciationsViewModel.highlightedLanguages,
+            onLanguageBoxClick = {
+                pronunciationsViewModel.filterPronunciations(it)
+            }
+        )
         LazyColumn {
-            items(pronunciationsViewModel.pronunciationsList) {
-                PronunciationCard(
-                    pronunciation = it,
-                    onPlayButtonClickCallback = {
-                        PronunciationPlayer.playRemoteAudio(it)
-                    }
-                )
+            pronunciationsViewModel.highlightedLanguages.filter { it.selected }.run {
+                if (isEmpty()) pronunciationsViewModel.languages else pronunciationsViewModel.languages.filter {
+                    this.map { it.name }.contains(it.language)
+                }
+            }.forEach {
+                items(it.items) {
+                    PronunciationCard(
+                        pronunciation = it,
+                        onPlayButtonClickCallback = {
+                            PronunciationPlayer.playRemoteAudio(it)
+                        }
+                    )
+                }
             }
         }
     }

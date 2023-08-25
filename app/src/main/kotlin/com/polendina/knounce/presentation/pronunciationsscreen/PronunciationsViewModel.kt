@@ -12,25 +12,26 @@ class PronunciationsViewModel(
 ): ViewModel() {
 
     // Expose screen UI state
-    private val _pronunciationsList = mutableStateListOf<Pronunciations.Datum.Item>()
-    val pronunciationsList = _pronunciationsList
     private var _query = mutableStateOf("")
     val query = _query
-    private val _languages = mutableStateListOf<String>()
+    private val _languages = mutableStateListOf<Pronunciations.Datum>()
 //    private val _languages = mutableStateListOf<String>("Arabic", "English", "French", "Spanish", "Interlingua")
     val languages = _languages
-    private val _highlighted_languages = mutableStateListOf<String>()
-    val highlighted_languages = _highlighted_languages
+    val highlightedLanguages = mutableStateListOf<LanguageSelected>()
 
     // Handle business logic
     fun updateQuery(newQuery: String) {
         _query.value = newQuery
     }
-    private fun updatePronunciationsList(newList: Pronunciations) {
-        _pronunciationsList.clear()
-        newList.data.forEach {
-            _pronunciationsList.addAll(it.items)
-        }
+
+    /**
+     *
+     *
+     * @param newList
+     */
+    private fun updateLanguagesList(newList: Pronunciations) {
+        _languages.clear()
+        _languages.addAll(newList.data)
     }
     private val pronunciationRepository = ForvoPronunciation()
 
@@ -45,13 +46,22 @@ class PronunciationsViewModel(
             interfaceLanguageCode = UserLanguages.ENGLISH.code
         ) {
             it?.apply {
-                updatePronunciationsList(it)
-                _languages.clear()
-                it.data.forEach {
-                    _languages.add(it.language)
-                }
+                updateLanguagesList(it)
+                highlightedLanguages.clear()
+                highlightedLanguages.addAll(_languages.map { LanguageSelected(it.language, false) })
             }
         }
     }
 
+    fun filterPronunciations(pronunciationLanguage: LanguageSelected) {
+        if (highlightedLanguages.size == highlightedLanguages.filter { it.selected }.size) highlightedLanguages.forEach { it.selected = false }
+        highlightedLanguages.indexOf(pronunciationLanguage).run {
+            highlightedLanguages[this] = pronunciationLanguage.copy(selected = !highlightedLanguages[this].selected)
+        }
+    }
+
 }
+data class LanguageSelected(
+    val name: String,
+    var selected: Boolean
+)

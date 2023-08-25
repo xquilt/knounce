@@ -1,6 +1,7 @@
 package com.polendina.knounce.presentation.pronunciationsscreen.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,13 +20,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.polendina.knounce.domain.model.Pronunciations
+import com.polendina.knounce.presentation.pronunciationsscreen.LanguageSelected
 
 @Composable
 fun LanguagesRow(
-    languages: List<String>,
+    languages: List<LanguageSelected>,
+    onLanguageBoxClick: (LanguageSelected) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyRow (
@@ -42,16 +47,19 @@ fun LanguagesRow(
                     .clip(RoundedCornerShape(10.dp))
                     .fillMaxHeight()
                     .wrapContentWidth()
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .background(if (it.selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer)
                     .padding(
                         vertical = 0.dp,
                         horizontal = 20.dp
-                    )
+                    )//secondaryContainer
+                    .clickable {
+                        onLanguageBoxClick(it)
+                    }
             ) {
                 Text(
-                    text = it,
+                    text = it.name,
                     style = TextStyle(
-                        color = MaterialTheme.colorScheme.onSecondary
+                        color = if (it.selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer
                     ),
                     modifier = Modifier
                 )
@@ -67,7 +75,10 @@ fun LanguagesRowPreview() {
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
     ) {
-        LanguagesRow(languages = listOf("Arabic", "English", "French", "Spanish", "Interlingua"))
+        LanguagesRow(
+            languages = listOf("Arabic", "English", "French", "Spanish", "Interlingua").map { LanguageSelected(it, it.contains("i").not() ) },
+            onLanguageBoxClick = {}
+        )
     }
 }
 
