@@ -17,4 +17,3 @@ data class LanguageCodes (
         val language: String
     )
 }
-

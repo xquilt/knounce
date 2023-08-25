@@ -3,6 +3,7 @@ package com.polendina.knounce.data.repository.pronunciation
 import com.polendina.knounce.domain.model.FromToResponse
 import com.polendina.knounce.domain.model.LanguageCodes
 import com.polendina.knounce.domain.model.Pronunciations
+import com.polendina.knounce.domain.model.UserLanguages
 import com.polendina.knounce.domain.repository.PronunciationRepository
 import retrofit2.Call
 import retrofit2.Callback
@@ -22,26 +23,53 @@ class ForvoPronunciation: PronunciationRepository {
     }
     override fun wordPronunciations(
         word: String,
+        languageCode: String,
+        interfaceLanguageCode: String,
         callback: (pronunciations: Pronunciations?) -> Unit
     ) {
         retrofitInstance.wordPronunciations(
             word = word,
-            languageCode = UserLanguages.ENGLISH.code
+            languageCode = languageCode,
+            interfaceLanguageCode = interfaceLanguageCode
         ).enqueue(object: Callback<Pronunciations> {
-            override fun onResponse(call: Call<Pronunciations>, response: Response<Pronunciations>) {
-                callback(response.body())
+                override fun onResponse(call: Call<Pronunciations>, response: Response<Pronunciations>) {
+                    callback(response.body())
+                }
+                override fun onFailure(call: Call<Pronunciations>, t: Throwable) {
+                    t.printStackTrace()
+                }
             }
-            override fun onFailure(call: Call<Pronunciations>, t: Throwable) {
-                t.printStackTrace()
+        )
+    }
+    override fun wordPronunciationsAll(
+        word: String,
+        interfaceLanguageCode: String,
+        callback: (pronunciations: Pronunciations?) -> Unit
+    ) {
+        retrofitInstance.wordPronunciationsAll(
+            word = word,
+            interfaceLanguageCode = interfaceLanguageCode
+        ).enqueue(object: Callback<Pronunciations> {
+                override fun onResponse(call: Call<Pronunciations>, response: Response<Pronunciations>) {
+                    callback(response.body())
+                }
+                override fun onFailure(call: Call<Pronunciations>, t: Throwable) {
+                    t.printStackTrace()
+                }
             }
-        }
         )
     }
     override fun phrasePronunciations(
         word: String,
+        languageCode: String,
+        interfaceLanguageCode: String,
         callback: (pronunciations: Pronunciations?) -> Unit
     ) {
-        retrofitInstance.phrasePronunciations(word = word, languageCode = UserLanguages.ENGLISH.code).enqueue(object:
+        retrofitInstance.phrasePronunciations(
+            word = word,
+            languageCode = languageCode,
+            interfaceLanguageCode = interfaceLanguageCode
+        ).enqueue(object:
             Callback<Pronunciations> {
             override fun onResponse(call: Call<Pronunciations>, response: Response<Pronunciations>) {
                 callback(response.body())
@@ -51,7 +79,24 @@ class ForvoPronunciation: PronunciationRepository {
             }
         })
     }
-
+    override fun phrasePronunciationsAll(
+        word: String,
+        interfaceLanguageCode: String,
+        callback: (pronunciations: Pronunciations?) -> Unit
+    ) {
+        retrofitInstance.phrasePronunciationsAll(
+            word = word,
+            interfaceLanguageCode = interfaceLanguageCode
+        ).enqueue(object:
+            Callback<Pronunciations> {
+            override fun onResponse(call: Call<Pronunciations>, response: Response<Pronunciations>) {
+                callback(response.body())
+            }
+            override fun onFailure(call: Call<Pronunciations>, t: Throwable) {
+                TODO("Not yet implemented")
+            }
+        })
+    }
     override fun translatePronunciationsToFroMap(callback: (response: FromToResponse?) -> Unit): Unit {
         retrofitInstance.pronunciationTranslationMap(UserLanguages.ENGLISH.code).enqueue(object: Callback<FromToResponse> {
             override fun onResponse(call: Call<FromToResponse>, response: Response<FromToResponse>) {
@@ -64,10 +109,6 @@ class ForvoPronunciation: PronunciationRepository {
 
     }
 
-    /*
-        - This method -unlike 'plain' pronunciation- does both 'translate' and then offer the pronunciation for the translated word.
-        - Its parameter is a from-to language code that can get obtained from the
-    */
     override fun translateSearchTranslation(
         word: String,
         fromToLanguageCode: String,
@@ -103,17 +144,4 @@ class ForvoPronunciation: PronunciationRepository {
         })
     }
 
-}
-
-/**
- * Return the respective language code of each language.
- * The language is determined by the user being the UI interface language.
- * The respective language code is used at the URLs of network requests.
- *
- */
-internal enum class UserLanguages(val code: String) {
-    ENGLISH("en"),
-    ESPANOL("es"),
-    FRANCAIS("fr"),
-    PORTUGES("pt"),
 }

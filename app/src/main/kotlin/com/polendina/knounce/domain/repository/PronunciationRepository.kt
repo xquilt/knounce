@@ -7,6 +7,7 @@ import com.polendina.knounce.domain.model.Pronunciations
 interface PronunciationRepository {
     /**
      *  Return the from-to language codes of the respective languages for each available language.
+     *
      *  @param word
     */
     fun languageCodes(callback: (response: LanguageCodes?) -> Unit): Unit
@@ -15,10 +16,25 @@ interface PronunciationRepository {
      * Pronunciations returned can be either strictly single words, or entire phrases.
      *
      * @param word The word to return available pronunciations to.
-     * @param singleWordEntirePhrase Either return pronunciations of single words or entire phrases.
+     * @param singleWordEntirePhrase Either return pronunciations of single words or entire phrases. //todo: should be disposed/refined or something
+     * @param languageCode
     */
-    fun wordPronunciations(word: String, callback: (pronunciations: Pronunciations?) -> Unit): Unit
-    fun phrasePronunciations(word: String, callback: (pronunciations: Pronunciations?) -> Unit): Unit
+    fun wordPronunciations(word: String, languageCode: String, interfaceLanguageCode: String, callback: (pronunciations: Pronunciations?) -> Unit): Unit
+    /**
+     *
+     *
+     */
+    fun wordPronunciationsAll(word: String, interfaceLanguageCode: String, callback: (pronunciations: Pronunciations?) -> Unit): Unit
+    /**
+     *
+     *
+     */
+    fun phrasePronunciations(word: String, languageCode: String, interfaceLanguageCode: String, callback: (pronunciations: Pronunciations?) -> Unit): Unit
+    /**
+     *
+     *
+     */
+    fun phrasePronunciationsAll(word: String, interfaceLanguageCode: String, callback: (pronunciations: Pronunciations?) -> Unit): Unit
     /**
      * First translate the given word, then obtain the available pronunciations of the translated word,
      *

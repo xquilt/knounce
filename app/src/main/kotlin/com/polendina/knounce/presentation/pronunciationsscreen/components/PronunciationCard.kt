@@ -29,7 +29,7 @@ internal fun PronunciationCard(
     Card (
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp, vertical = 5.dp)
+            .padding(horizontal = 0.dp, vertical = 5.dp)
             .height(60.dp)
     ) {
         Row (
@@ -57,4 +57,3 @@ internal fun PronunciationCard(
         }
     }
 }
-
