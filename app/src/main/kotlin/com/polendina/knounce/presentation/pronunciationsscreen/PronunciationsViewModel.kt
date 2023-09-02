@@ -1,23 +1,33 @@
 package com.polendina.knounce.presentation.pronunciationsscreen
 
+import android.app.Application
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.AndroidViewModel
+import com.polendina.knounce.NetworkHandler
 import com.polendina.knounce.data.repository.pronunciation.ForvoPronunciation
 import com.polendina.knounce.domain.model.Pronunciations
 import com.polendina.knounce.domain.model.UserLanguages
 
 class PronunciationsViewModel(
+    application: Application = Application()
 //    private val pronunciationRepository: ForvoPronunciation // its methods were getting skipped over when called down below
-): ViewModel() {
+//): ViewModel() {
+): AndroidViewModel(application) {
 
     // Expose screen UI state
     private var _query = mutableStateOf("")
     val query = _query
-    private val _languages = mutableStateListOf<Pronunciations.Datum>()
+    val languages = mutableStateListOf<Pronunciations.Datum>()
 //    private val _languages = mutableStateListOf<String>("Arabic", "English", "French", "Spanish", "Interlingua")
-    val languages = _languages
     val highlightedLanguages = mutableStateListOf<LanguageSelected>()
+    var networkConnected = false
+        get() = NetworkHandler(application = getApplication<Application>()).isNetworkAvailable()
+        private set
+
+    var showImage by mutableStateOf(true)
 
     // Handle business logic
     fun updateQuery(newQuery: String) {
@@ -30,8 +40,8 @@ class PronunciationsViewModel(
      * @param newList
      */
     private fun updateLanguagesList(newList: Pronunciations) {
-        _languages.clear()
-        _languages.addAll(newList.data)
+        this.languages.clear()
+        this.languages.addAll(newList.data)
     }
     private val pronunciationRepository = ForvoPronunciation()
 
@@ -41,6 +51,7 @@ class PronunciationsViewModel(
      * @param searchTerm The search term to be used.
     */
     fun wordPronunciationsAll(searchTerm: String) {
+
         pronunciationRepository.wordPronunciationsAll(
             word = searchTerm,
             interfaceLanguageCode = UserLanguages.ENGLISH.code
@@ -48,7 +59,7 @@ class PronunciationsViewModel(
             it?.apply {
                 updateLanguagesList(it)
                 highlightedLanguages.clear()
-                highlightedLanguages.addAll(_languages.map { LanguageSelected(it.language, false) })
+                highlightedLanguages.addAll(this@PronunciationsViewModel.languages.map { LanguageSelected(it.language, false) })
             }
         }
     }
