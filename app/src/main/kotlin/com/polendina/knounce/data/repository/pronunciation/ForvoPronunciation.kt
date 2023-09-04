@@ -10,7 +10,11 @@ import retrofit2.Callback
 import retrofit2.Response
 import trancore.corelib.pronunciation.retrofitInstance
 
-class ForvoPronunciation: PronunciationRepository {
+fun addTwo(one: Int, two: Int): Int {
+    return (one + two)
+}
+
+object ForvoPronunciation: PronunciationRepository {
     override fun languageCodes(callback: (response: LanguageCodes?) -> Unit) {
         retrofitInstance.languageCodes(UserLanguages.ENGLISH.code).enqueue(object: Callback<LanguageCodes> {
             override fun onResponse(call: Call<LanguageCodes>, response: Response<LanguageCodes>) {
@@ -97,8 +101,12 @@ class ForvoPronunciation: PronunciationRepository {
             }
         })
     }
-    override fun translatePronunciationsToFroMap(callback: (response: FromToResponse?) -> Unit): Unit {
-        retrofitInstance.pronunciationTranslationMap(UserLanguages.ENGLISH.code).enqueue(object: Callback<FromToResponse> {
+
+    override fun translatePronunciationsFromToMap(
+        interfaceLanguage: String,
+        callback: (response: FromToResponse?) -> Unit
+    ) {
+        retrofitInstance.pronunciationTranslationMap(interfaceLanguage).enqueue(object: Callback<FromToResponse> {
             override fun onResponse(call: Call<FromToResponse>, response: Response<FromToResponse>) {
                 callback(response.body())
             }
@@ -106,7 +114,6 @@ class ForvoPronunciation: PronunciationRepository {
                 t.printStackTrace()
             }
         })
-
     }
 
     override fun translateSearchTranslation(
@@ -134,7 +141,10 @@ class ForvoPronunciation: PronunciationRepository {
         languageCode: String,
         callback: (response: Pronunciations?) -> Unit
     ): Unit {
-        retrofitInstance.alternativePronunciations(wordPhrase = wordPhrase, languageCode = languageCode).enqueue(object: Callback<Pronunciations> {
+        retrofitInstance.alternativePronunciations(
+            wordPhrase = wordPhrase,
+            languageCode = languageCode
+        ).enqueue(object: Callback<Pronunciations> {
             override fun onResponse(call: Call<Pronunciations>, response: Response<Pronunciations>) {
                 callback(response.body())
             }

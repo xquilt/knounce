@@ -6,8 +6,11 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import com.google.gson.Gson
 import com.polendina.knounce.NetworkHandler
+import com.polendina.knounce.PronunciationPlayer
 import com.polendina.knounce.data.repository.pronunciation.ForvoPronunciation
+import com.polendina.knounce.domain.model.Item
 import com.polendina.knounce.domain.model.Pronunciations
 import com.polendina.knounce.domain.model.UserLanguages
 
@@ -18,20 +21,20 @@ class PronunciationsViewModel(
 ): AndroidViewModel(application) {
 
     // Expose screen UI state
-    private var _query = mutableStateOf("")
-    val query = _query
+    var query = mutableStateOf("")
+        private set
     val languages = mutableStateListOf<Pronunciations.Datum>()
-//    private val _languages = mutableStateListOf<String>("Arabic", "English", "French", "Spanish", "Interlingua")
+    private val _languages = mutableStateListOf<String>("Arabic", "English", "French", "Spanish", "Interlingua")
     val highlightedLanguages = mutableStateListOf<LanguageSelected>()
     var networkConnected = false
         get() = NetworkHandler(application = getApplication<Application>()).isNetworkAvailable()
         private set
 
-    var showImage by mutableStateOf(true)
+    var showImage by mutableStateOf(false)
 
     // Handle business logic
     fun updateQuery(newQuery: String) {
-        _query.value = newQuery
+        this.query.value = newQuery
     }
 
     /**
@@ -43,31 +46,45 @@ class PronunciationsViewModel(
         this.languages.clear()
         this.languages.addAll(newList.data)
     }
-    private val pronunciationRepository = ForvoPronunciation()
 
     /**
      * Search for pronunciations of a single term.
      *
      * @param searchTerm The search term to be used.
     */
-    fun wordPronunciationsAll(searchTerm: String) {
-
-        pronunciationRepository.wordPronunciationsAll(
+    fun wordPronunciationsAll(
+        searchTerm: String
+    ) {
+        ForvoPronunciation.wordPronunciationsAll(
             word = searchTerm,
             interfaceLanguageCode = UserLanguages.ENGLISH.code
         ) {
             it?.apply {
                 updateLanguagesList(it)
                 highlightedLanguages.clear()
-                highlightedLanguages.addAll(this@PronunciationsViewModel.languages.map { LanguageSelected(it.language, false) })
+                highlightedLanguages.addAll(languages.map { LanguageSelected(it.language, false) })
             }
         }
     }
 
-    fun filterPronunciations(pronunciationLanguage: LanguageSelected) {
+    fun filterPronunciations(
+        pronunciationLanguage: LanguageSelected
+    ) {
         if (highlightedLanguages.size == highlightedLanguages.filter { it.selected }.size) highlightedLanguages.forEach { it.selected = false }
         highlightedLanguages.indexOf(pronunciationLanguage).run {
             highlightedLanguages[this] = pronunciationLanguage.copy(selected = !highlightedLanguages[this].selected)
+        }
+    }
+
+    fun playRemoteAudio(pronunciation: Item): Boolean {
+        Gson().fromJson(pronunciation.standard_pronunciation, Item.StandardPronunciation::class.java).realmp3.run {
+//            if (NetworkHandler(context).isNetworkAvailable()) {
+            if (networkConnected) {
+                PronunciationPlayer.playRemoteAudio(this)
+                return (true)
+            } else {
+                return (false)
+            }
         }
     }
 

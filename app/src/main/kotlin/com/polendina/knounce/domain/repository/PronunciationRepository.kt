@@ -43,7 +43,14 @@ interface PronunciationRepository {
      * @param callback The callback functions, that takes the returned response argument.
     */
     fun translateSearchTranslation(word: String, fromToLanguageCode: String, callback: (response: Pronunciations?) -> Unit): Unit
-    fun translatePronunciationsToFroMap(callback: (response: FromToResponse?) -> Unit): Unit
+
+    /**
+     * Obtain a predefined from-to languages list, that displays available translations & pronunciations.
+     *
+     * @param interfaceLanguage The language of the App's UI.
+     * @param callback A callback function, with the Response as a parameter.
+     */
+    fun translatePronunciationsFromToMap(interfaceLanguage: String, callback: (response: FromToResponse?) -> Unit): Unit
     /**
      * Find available alternative pronunciations of the same word or phrase returned from the general results list.
      *

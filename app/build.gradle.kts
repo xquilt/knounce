@@ -61,17 +61,41 @@ dependencies {
 //    implementation(libs.material3)
     implementation(libs.androidx.material3)
     testImplementation(libs.junit)
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.retrofit2:converter-scalars:2.1.0")
+    val lifecycle_version = "2.6.1"
+    // ViewModel
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    // ViewModel utilities for Compose
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    val lifecycle_version = "2.6.1"
-    // ViewModel
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    // ViewModel utilities for Compose
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    // Local Unit tests
+    testImplementation("androidx.test:core:1.4.0")
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("androidx.arch.core:core-testing:2.1.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.1")
+    testImplementation("com.google.truth:truth:1.1.3")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.9.1")
+    testImplementation("io.mockk:mockk:1.10.5")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.1.0-alpha04")
+
+    // Instrumentation tests
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.37")
+    androidTestImplementation("junit:junit:4.13.2")
+    androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.1")
+    androidTestImplementation("androidx.arch.core:core-testing:2.1.0")
+    androidTestImplementation("com.google.truth:truth:1.1.3")
+    androidTestImplementation("androidx.test.ext:junit:1.1.3")
+    androidTestImplementation("androidx.test:core-ktx:1.4.0")
+    androidTestImplementation("com.squareup.okhttp3:mockwebserver:4.9.1")
+    androidTestImplementation("io.mockk:mockk-android:1.10.5")
+    androidTestImplementation("androidx.test:runner:1.4.0")
 }

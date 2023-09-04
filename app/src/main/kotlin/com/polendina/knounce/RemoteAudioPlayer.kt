@@ -1,11 +1,14 @@
 package com.polendina.knounce
 
 import android.app.Application
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import androidx.annotation.RequiresPermission
 import androidx.core.content.getSystemService
 
 /**
@@ -97,5 +100,4 @@ class NetworkHandler(private val application: Context) {
         }
         return (result)
     }
-
 }

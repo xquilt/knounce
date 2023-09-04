@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -18,12 +19,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.polendina.knounce.domain.model.Pronunciations
+import com.google.gson.Gson
+import com.polendina.knounce.domain.model.Item
 
 @Composable
 internal fun PronunciationCard(
-    pronunciation: Pronunciations.Datum.Item,
-    onPlayButtonClickCallback: (mediaUrl: String) -> Unit,
+    pronunciation: Item,
+    onRecordButtonCallback: () -> Unit,
+    onPlayButtonClickCallback: (pronunciation: Item) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card (
@@ -35,12 +38,28 @@ internal fun PronunciationCard(
         Row (
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                onClick = {
-                    onPlayButtonClickCallback(pronunciation.standard_pronunciation.realmp3)
+            if (pronunciation.standard_pronunciation.isJsonObject) {
+                IconButton(
+                    onClick = {
+                        onPlayButtonClickCallback( pronunciation )
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.PlayArrow,
+                        contentDescription = null,
+                        tint = Color.Blue
+                    )
                 }
-            ) {
-                Icon(imageVector = Icons.Outlined.PlayArrow, contentDescription = null, tint = Color.Blue)
+            } else {
+                IconButton(
+                    onClick = onRecordButtonCallback
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Add,
+                        contentDescription = null,
+                        tint = Color.Red
+                    )
+                }
             }
             Column {
                 Text(text = pronunciation.original, style = TextStyle(
