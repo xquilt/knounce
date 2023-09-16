@@ -1,5 +1,6 @@
 package com.polendina.knounce.presentation.profile.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.polendina.knounce.R
 
 @Composable
 fun ProfileScreen(
@@ -87,17 +89,17 @@ fun Modifier.notificationCircle(): Modifier =
     }
 
 enum class SettingsItem(
-    val category: String,
+    @StringRes val category: Int,
     val icon: ImageVector,
 ) {
     // TODO: Icons need to be refined
-    ACCOUNT(category = "Account", icon = Icons.Outlined.AccountBox),
-    CHAT(category = "Chat", icon = Icons.Outlined.Settings),
-    SETTINGS(category = "Settings", icon = Icons.Outlined.Settings),
-    PRONUNCIATION(category = "Pronunciation", icon = Icons.Outlined.DateRange),
-    BOOKMARKS(category = "Favorites", icon = Icons.Outlined.Star),
-    INFO(category = "Info", icon = Icons.Outlined.Info),
-    LANGUAGE(category = "Language", icon = Icons.Outlined.Delete)
+    ACCOUNT(category = R.string.Account, icon = Icons.Outlined.AccountBox),
+    CHAT(category = R.string.Chat, icon = Icons.Outlined.Settings),
+    SETTINGS(category = R.string.Settings, icon = Icons.Outlined.Settings),
+    PRONUNCIATION(category = R.string.Pronunciation, icon = Icons.Outlined.DateRange),
+    FAVORITES(category = R.string.Favorites, icon = Icons.Outlined.Star),
+    INFO(category = R.string.Info, icon = Icons.Outlined.Info),
+    LANGUAGE(category = R.string.Language, icon = Icons.Outlined.Delete)
 }
 
 @Preview(showBackground = true)

@@ -60,8 +60,10 @@ dependencies {
     implementation(libs.ui)
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
+    implementation("androidx.compose.material:material:1.5.0")
 //    implementation(libs.material3)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation.runtime.ktx)
     testImplementation(libs.junit)
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
@@ -100,4 +102,8 @@ dependencies {
     androidTestImplementation("com.squareup.okhttp3:mockwebserver:4.9.1")
 //    androidTestImplementation("io.mockk:mockk-android:1.10.5")
     androidTestImplementation("androidx.test:runner:1.4.0")
+
+    // Floating chatead
+    implementation("io.github.torrydo:floating-bubble-view:0.6.1")
+
 }

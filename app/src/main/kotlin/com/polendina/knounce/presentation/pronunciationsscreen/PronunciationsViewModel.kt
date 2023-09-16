@@ -1,5 +1,6 @@
 package com.polendina.knounce.presentation.pronunciationsscreen
 
+import NetworkHandler
 import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -7,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import com.google.gson.Gson
-import com.polendina.knounce.NetworkHandler
 import com.polendina.knounce.PronunciationPlayer
 import com.polendina.knounce.data.repository.pronunciation.ForvoPronunciation
 import com.polendina.knounce.domain.model.Item
@@ -27,7 +27,7 @@ class PronunciationsViewModel(
     private val _languages = mutableStateListOf<String>("Arabic", "English", "French", "Spanish", "Interlingua")
     val highlightedLanguages = mutableStateListOf<LanguageSelected>()
     var networkConnected = false
-        get() = NetworkHandler(application = getApplication<Application>()).isNetworkAvailable()
+        get() = NetworkHandler(context = getApplication<Application>()).isNetworkAvailable()
         private set
 
     var showImage by mutableStateOf(false)
@@ -87,6 +87,9 @@ class PronunciationsViewModel(
             }
         }
     }
+
+    // TODO: This should be read from the user configurations/settings.
+    var preventScreenFromDimming by mutableStateOf(true)
 
 }
 data class LanguageSelected(

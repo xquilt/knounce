@@ -1,15 +1,11 @@
 package com.polendina.knounce
 
 import android.app.Application
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import androidx.annotation.RequiresPermission
-import androidx.core.content.getSystemService
 
 /**
  * Companion object responsible for playing remote audio files.
@@ -34,8 +30,9 @@ object PronunciationPlayer {
         mediaPlayer.apply {
             reset()
             setDataSource(url)
-            prepare()
-            start()
+            prepareAsync()
+        }.setOnPreparedListener {
+            it.start()
         }
     }
 
@@ -81,23 +78,5 @@ object PronunciationPlayer {
             return (true)
         }
         return false
-    }
-
-}
-
-// TODO: I still have no idea about where this should be appropriately placed
-class NetworkHandler(private val application: Context) {
-    private val connectivityManager = application.applicationContext.getSystemService(Application.CONNECTIVITY_SERVICE) as ConnectivityManager
-    fun isNetworkAvailable(): Boolean {
-        var result = false
-        connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)?.apply {
-            result = when {
-                hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-                hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-                hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-                else -> false
-            }
-        }
-        return (result)
     }
 }

@@ -4,4 +4,11 @@
     <string name="no_network_interface">No Network Connection</string>
     <string name="no_network_connection_description">You are not connected to the internet. Make sure Wi-Fi is on, Airplane Mode is off and try again</string>
     <string name="retry">Retry</string>
+    <string name="Account">Account</string>
+    <string name="Chat">Chat</string>
+    <string name="Settings">Settings</string>
+    <string name="Pronunciation">Pronunciation</string>
+    <string name="Favorites">Favorites</string>
+    <string name="Info">Info</string>
+    <string name="Language">Language</string>
 </resources>
