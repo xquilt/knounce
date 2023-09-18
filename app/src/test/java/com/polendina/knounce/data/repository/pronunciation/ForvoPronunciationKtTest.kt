@@ -1,7 +1,16 @@
 package com.polendina.knounce.data.repository.pronunciation
 
+import com.google.gson.Gson
+import com.polendina.knounce.PronunciationPlayer
 import com.polendina.knounce.domain.model.FromToResponse
+import com.polendina.knounce.domain.model.Item
+import com.polendina.knounce.domain.model.LanguageCodes
+import com.polendina.knounce.domain.model.Pronunciations
 import com.polendina.knounce.domain.model.UserLanguages
+import com.polendina.knounce.presentation.shared.floatingbubble.FORVO_LANGUAGE
+import kotlinx.coroutines.runBlocking
+import me.bush.translator.Language
+import me.bush.translator.Translator
 
 import org.junit.Test
 import retrofit2.Call
@@ -39,7 +48,9 @@ class ForvoPronunciationKtTest {
 
     @Test
     fun translatePronunciationsFromToMap() {
-        retrofitInstance.pronunciationTranslationMap(UserLanguages.ENGLISH.code).execute().let {
+        retrofitInstance.pronunciationTranslationMap(
+            UserLanguages.ENGLISH.code
+        ).execute().let {
             if (it.isSuccessful) {
                 it.body()?.let {
                     if(it.status == "ok") {
@@ -47,6 +58,44 @@ class ForvoPronunciationKtTest {
                             println(it.children)
                         }
                     }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun firstPronunciation() {
+        runBlocking {
+            listOf("einem", "nacht", "bett", "daddy").forEach {
+                retrofitInstance.wordPronunciations(
+                    word = it,
+                    interfaceLanguageCode = UserLanguages.ENGLISH.code,
+                    languageCode = FORVO_LANGUAGE.GERMAN.code
+                ).execute().let {
+                    try {
+                        Gson().fromJson(it.body()?.data?.first()?.items?.first()?.standard_pronunciation, Item.StandardPronunciation::class.java).run {
+                            println(this.realmp3)
+                        }
+                    } catch (e: NoSuchElementException) {}
+                }
+            }
+        }
+    }
+
+}
+
+class GoogleTranslationTest {
+
+    @Test
+    fun wordTranslatorTest() {
+        runBlocking {
+            listOf("game", "Hello", "welcome").forEach {
+                Translator().translate(
+                    text = it,
+                    source = Language.AUTO,
+                    target = Language.GERMAN,
+                ).apply {
+                    println(this.translatedText)
                 }
             }
         }

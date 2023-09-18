@@ -1,14 +1,17 @@
 package com.polendina.knounce.data.repository.pronunciation
 
+import android.util.Log
 import com.polendina.knounce.domain.model.FromToResponse
 import com.polendina.knounce.domain.model.LanguageCodes
 import com.polendina.knounce.domain.model.Pronunciations
 import com.polendina.knounce.domain.model.UserLanguages
 import com.polendina.knounce.domain.repository.PronunciationRepository
+import org.slf4j.event.Level
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import trancore.corelib.pronunciation.retrofitInstance
+import java.util.logging.Logger
 
 fun addTwo(one: Int, two: Int): Int {
     return (one + two)

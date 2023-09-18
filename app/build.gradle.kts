@@ -81,6 +81,12 @@ dependencies {
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
 
+    // Floating chatead
+    implementation("io.github.torrydo:floating-bubble-view:0.6.2")
+
+    // Google translate
+    implementation("com.github.therealbush:translator:1.0.2")
+
     // Local Unit tests
     testImplementation("androidx.test:core:1.5.0")
     testImplementation("junit:junit:4.13.2")
@@ -102,8 +108,5 @@ dependencies {
     androidTestImplementation("com.squareup.okhttp3:mockwebserver:4.9.1")
 //    androidTestImplementation("io.mockk:mockk-android:1.10.5")
     androidTestImplementation("androidx.test:runner:1.4.0")
-
-    // Floating chatead
-    implementation("io.github.torrydo:floating-bubble-view:0.6.1")
 
 }

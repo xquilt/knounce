@@ -33,9 +33,39 @@
             </intent-filter>
         </activity>
         <service
-            android:name=".MyService"
+            android:name=".presentation.shared.floatingbubble.MyService"
             android:foregroundServiceType="specialUse">
         </service>
+        <service
+            android:name=".presentation.shared.floatingbubble.HandleSelection"
+            android:exported="true"
+            android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE">
+            <intent-filter>
+                <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="sms" />
+                <data android:scheme="smsto" />
+                <data android:scheme="mms" />
+                <data android:scheme="mmsto" />
+            </intent-filter>
+        </service>
+        <activity
+            android:name=".presentation.shared.floatingbubble.What"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:excludeFromRecents="true"
+            android:label="@string/app_name">
+            <intent-filter
+                android:order="0"
+                android:priority="30"
+                >
+                <action android:name="android.intent.action.PROCESS_TEXT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>
