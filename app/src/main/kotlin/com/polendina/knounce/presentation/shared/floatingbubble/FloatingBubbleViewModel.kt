@@ -1,12 +1,18 @@
 package com.polendina.knounce.presentation.shared.floatingbubble
 
+import android.app.Application
+import android.app.Service
+import android.content.ClipboardManager
+import android.content.Intent
+import android.os.IBinder
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.lifecycle.AndroidViewModel
 import com.google.gson.Gson
 import com.polendina.knounce.PronunciationPlayer
-import com.polendina.knounce.data.repository.pronunciation.ForvoPronunciation
 import com.polendina.knounce.domain.model.Item
 import com.polendina.knounce.domain.model.UserLanguages
 import kotlinx.coroutines.CoroutineScope
@@ -16,45 +22,87 @@ import me.bush.translator.Language
 import me.bush.translator.Translator
 import trancore.corelib.pronunciation.retrofitInstance
 
-class FloatingBubbleViewModel : ViewModel() {
-    var srcWord by mutableStateOf("") // TODO: I should load this value from string resources, but can't use stringResource() outside of a 'composable'
-    var targetWord by mutableStateOf("")
+class FloatingBubbleViewModel(
+    application: Application = Application()
+) : AndroidViewModel(application) {
+    var srcWord by mutableStateOf(TextFieldValue(text = ""))
+    var srcWordDisplay by mutableStateOf("")
+    var targetWordDisplay by mutableStateOf("")
     val ioScope = CoroutineScope(Dispatchers.IO)
     var expanded by mutableStateOf(true)
-    private val loadedPronunciations = mutableMapOf<String, String>()
+    // FIXME: Failed attempted to access the clipboard from within the View model
+//    val clipboardManager = application.getSystemService(Service.CLIPBOARD_SERVICE) as ClipboardManager
+//    private val clipboardContent = clipboardManager.primaryClip?.getItemAt(0)?.text.toString()
+    val loadedPronunciations = mutableStateMapOf<String, List<Pair<String, String>>>()
+//    val loadedPronunciations = mutableMapOf("" to listOf(("einem" to ""), ("seit einema monat" to ""), ("einem" to ""), ("seit einem monat" to ""), ("seit einem monat" to "")))
 
+    /**
+     * Translate the current value of the text field.
+     *
+     */
     fun translateWord() {
         ioScope.launch {
             Translator().translate(
-                text = srcWord,
+                text = srcWordDisplay,
                 source = Language.AUTO,
                 target = Language.ENGLISH
             ).apply {
-                targetWord = translatedText
+                targetWordDisplay = translatedText
             }
         }
     }
 
-    fun just(
-        searchTerm: String
-    ) {
+    /**
+     * Play remote pronunciation audio.
+     * Grab the appropriate direct audio file URL.
+     *
+     * @param searchTerm The word to be pronounced.
+     * @param shuffle Determine whether to play a the single first pronunciation, or shuffle randomly through available pronunciations.
+     */
+    suspend fun grabAudioFile(
+        searchTerm: String,
+        shuffle: Boolean
+    ): String {
+        var url = ""
         loadedPronunciations.get(searchTerm)?.let {
-            PronunciationPlayer.playRemoteAudio(it)
-            return
+            url = if (shuffle) it.random().second else it.first().second
         }
+        retrofitInstance.wordPronunciations(
+            word = searchTerm,
+            interfaceLanguageCode = UserLanguages.ENGLISH.code,
+            languageCode = FORVO_LANGUAGE.GERMAN.code
+        ).execute().let {
+            try {
+                it.body()?.data?.first()?.items?.map {item ->
+                    item.original to
+                    Gson().fromJson(
+                        item.standard_pronunciation,
+                        Item.StandardPronunciation::class.java
+                    ).realmp3
+                }?.let {
+                    loadedPronunciations.put(searchTerm, it)
+                    url = if (shuffle) it.random().second else it.first().second
+                }
+            } catch (e: NoSuchElementException) {}
+        }
+        return(url)
+    }
+
+    /**
+     * Play remote pronunciation audio.
+     *
+     * @param searchTerm: String,
+     * @param shuffle: Boolean
+    */
+    fun playAudio(
+        searchTerm: String,
+        shuffle: Boolean
+    )  {
         ioScope.launch {
-            retrofitInstance.wordPronunciations(
-                word = searchTerm,
-                interfaceLanguageCode = UserLanguages.ENGLISH.code,
-                languageCode = FORVO_LANGUAGE.GERMAN.code
-            ).execute().let {
-                try {
-                    Gson().fromJson(it.body()?.data?.first()?.items?.first()?.standard_pronunciation, Item.StandardPronunciation::class.java).let {
-                        loadedPronunciations.put(searchTerm, it.realmp3)
-                        PronunciationPlayer.playRemoteAudio(it.realmp3)
-                    }
-                } catch (e: NoSuchElementException) {}
-            }
+            PronunciationPlayer.playRemoteAudio(grabAudioFile(
+                searchTerm = searchTerm,
+                shuffle = shuffle
+            ))
         }
     }
 

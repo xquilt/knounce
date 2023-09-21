@@ -27,7 +27,6 @@ fun BubbleCompose(
     expand: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-
     Box (
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -39,40 +38,9 @@ fun BubbleCompose(
             painter = painterResource(id = R.drawable.ic_launcher_foreground),
             contentDescription = null,
             modifier = Modifier
-//                .fillMaxSize()
                 .clickable { runBlocking { expand() } }
         )
     }
-
-//    LaunchedEffect(Unit){
-//        while(true){
-//            if(index >=2){
-//                index = 0
-//            }else index++
-//            delay(1000)
-//        }
-//    }
-
-//        Box(
-//            modifier = Modifier
-//                .pointerInput(Unit) {
-//                    detectTapGestures(
-//                        onLongPress = {
-//                            Toast
-//                                .makeText(context, "Long click: Copied \"${songs[index]}\"", Toast.LENGTH_LONG)
-//                                .show()
-//                        }
-//                    )
-//                }
-//            ,
-//            contentAlignment = Alignment.Center
-//        ) {
-//            Text(
-//                text = songs[index],
-//                fontWeight = FontWeight.Bold,
-//            )
-//        }
-
 }
 
 @Preview(showBackground = true)

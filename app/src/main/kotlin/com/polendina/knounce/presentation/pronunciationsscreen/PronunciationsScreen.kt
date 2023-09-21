@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.polendina.knounce.PronunciationPlayer
 import com.polendina.knounce.presentation.pronunciationsscreen.PronunciationsViewModel
 import com.polendina.knounce.presentation.pronunciationsscreen.components.homescreen.PronunciationCard
 
@@ -23,10 +22,10 @@ import com.polendina.knounce.presentation.shared.NoConnectionComposable
 
 @Composable
 fun PronunciationsScreen(
-    modifier: Modifier = Modifier,
 //    pronunciationsViewModel: PronunciationsViewModel = PronunciationsViewModel(ForvoPronunciation()),
     pronunciationsViewModel: PronunciationsViewModel = viewModel(),
-    context: Context = LocalContext.current
+    context: Context = LocalContext.current,
+    modifier: Modifier = Modifier
 ) {
     Column (
         verticalArrangement = Arrangement.spacedBy(5.dp),

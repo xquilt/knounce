@@ -1,5 +1,6 @@
 package com.polendina.knounce.data.repository.pronunciation
 
+import androidx.compose.ui.platform.isDebugInspectorInfoEnabled
 import com.google.gson.Gson
 import com.polendina.knounce.PronunciationPlayer
 import com.polendina.knounce.domain.model.FromToResponse
@@ -8,6 +9,7 @@ import com.polendina.knounce.domain.model.LanguageCodes
 import com.polendina.knounce.domain.model.Pronunciations
 import com.polendina.knounce.domain.model.UserLanguages
 import com.polendina.knounce.presentation.shared.floatingbubble.FORVO_LANGUAGE
+import com.polendina.knounce.presentation.shared.floatingbubble.FloatingBubbleViewModel
 import kotlinx.coroutines.runBlocking
 import me.bush.translator.Language
 import me.bush.translator.Translator
@@ -17,6 +19,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import trancore.corelib.pronunciation.retrofitInstance
+import kotlin.random.Random
 
 class ForvoPronunciationKtTest {
 
@@ -66,18 +69,14 @@ class ForvoPronunciationKtTest {
     @Test
     fun firstPronunciation() {
         runBlocking {
-            listOf("einem", "nacht", "bett", "daddy").forEach {
-                retrofitInstance.wordPronunciations(
-                    word = it,
-                    interfaceLanguageCode = UserLanguages.ENGLISH.code,
-                    languageCode = FORVO_LANGUAGE.GERMAN.code
-                ).execute().let {
-                    try {
-                        Gson().fromJson(it.body()?.data?.first()?.items?.first()?.standard_pronunciation, Item.StandardPronunciation::class.java).run {
-                            println(this.realmp3)
-                        }
-                    } catch (e: NoSuchElementException) {}
+            listOf("einem", "nacht", "bett", "daddy", "@!#$@!#$").forEach {word ->
+                listOf(false, true, true, true, true, true).forEach { choice ->
+                    println(FloatingBubbleViewModel().grabAudioFile(
+                        searchTerm = word,
+                        shuffle = choice
+                    ))
                 }
+                println()
             }
         }
     }

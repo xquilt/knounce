@@ -1,6 +1,7 @@
 package com.polendina.knounce.presentation.shared.floatingbubble
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,10 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -23,15 +21,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.polendina.knounce.R
-import com.polendina.knounce.ui.theme.SearchFieldColors
 import com.polendina.knounce.ui.theme.SearchFieldFontStyle
 
 @Composable
@@ -118,6 +117,8 @@ fun DisplayCard(
     onCardClick: () -> Unit = {},
     copyTextCallback: (String) -> Unit = {},
     playAudioCallback: (String) -> Unit = {},
+    firstImageVector: ImageVector,
+    secondImageVector: ImageVector,
     color: Color,
     modifier: Modifier = Modifier
 ) {
@@ -127,8 +128,12 @@ fun DisplayCard(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .height(150.dp)
-            .clickable(onClick = onCardClick)
+            .height(130.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onCardClick
+            )
     ) {
         Row (
             horizontalArrangement = Arrangement.End,
@@ -139,14 +144,14 @@ fun DisplayCard(
         ) {
             IconButton(onClick = { copyTextCallback(text) }) {
                 Icon(
-                    imageVector = Icons.Default.Menu,
+                    imageVector = firstImageVector,
                     contentDescription = null,
                     tint = color
                 )
             }
             IconButton(onClick = { playAudioCallback(text) }) {
                 Icon(
-                    imageVector = Icons.Default.PlayArrow,
+                    imageVector = secondImageVector,
                     contentDescription = null,
                     tint = color
                 )

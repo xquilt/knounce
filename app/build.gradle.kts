@@ -82,7 +82,10 @@ dependencies {
     debugImplementation(libs.ui.test.manifest)
 
     // Floating chatead
-    implementation("io.github.torrydo:floating-bubble-view:0.6.2")
+    implementation("io.github.torrydo:floating-bubble-view:0.6.3")
+
+    // Icons
+    implementation("androidx.compose.material:material-icons-extended:1.6.0-alpha01")
 
     // Google translate
     implementation("com.github.therealbush:translator:1.0.2")

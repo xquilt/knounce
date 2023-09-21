@@ -33,7 +33,7 @@
             </intent-filter>
         </activity>
         <service
-            android:name=".presentation.shared.floatingbubble.MyService"
+            android:name=".presentation.shared.floatingbubble.FloatingBubbleService"
             android:foregroundServiceType="specialUse">
         </service>
         <service

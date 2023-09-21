@@ -1,6 +1,5 @@
 package com.polendina.knounce
 
-import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -16,7 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import com.polendina.knounce.ui.theme.KnounceTheme
 
-import com.polendina.knounce.presentation.shared.floatingbubble.MyService
+import com.polendina.knounce.presentation.shared.floatingbubble.FloatingBubbleService
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,7 +30,7 @@ class MainActivity : ComponentActivity() {
                 ) {
 //                    PronunciationsScreen()
                     TextButton(onClick = {
-                        startService(Intent(context, MyService::class.java))
+                        startService(Intent(context, FloatingBubbleService::class.java))
                     }) {
                         Text(text = "Open It!")
                     }
