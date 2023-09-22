@@ -32,8 +32,8 @@ class FloatingBubbleViewModel(
     // FIXME: Failed attempted to access the clipboard from within the View model
 //    val clipboardManager = application.getSystemService(Service.CLIPBOARD_SERVICE) as ClipboardManager
 //    private val clipboardContent = clipboardManager.primaryClip?.getItemAt(0)?.text.toString()
-    val loadedPronunciations = mutableStateMapOf<String, List<Pair<String, String>>>()
-//    val loadedPronunciations = mutableStateMapOf("" to listOf(("einem" to ""), ("seit einema monat" to ""), ("einem" to ""), ("seit einem monat" to ""), ("seit einem monat" to "")))
+//    val loadedPronunciations = mutableStateMapOf<String, List<Pair<String, String>>>()
+    val loadedPronunciations = mutableStateMapOf("Einem" to listOf(("einem" to ""), ("seit einema monat" to ""), ("einem" to ""), ("seit einem monat" to ""), ("seit einem monat" to "")))
 
     /**
      * Translate the current value of the text field.
@@ -115,4 +115,3 @@ enum class FORVO_LANGUAGE(
     GERMAN("German", "de")
 }
 const val LOREM_IPSUM = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
-
