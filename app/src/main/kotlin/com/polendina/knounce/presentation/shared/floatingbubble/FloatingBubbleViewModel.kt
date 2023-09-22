@@ -1,10 +1,6 @@
 package com.polendina.knounce.presentation.shared.floatingbubble
 
 import android.app.Application
-import android.app.Service
-import android.content.ClipboardManager
-import android.content.Intent
-import android.os.IBinder
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,16 +21,19 @@ import trancore.corelib.pronunciation.retrofitInstance
 class FloatingBubbleViewModel(
     application: Application = Application()
 ) : AndroidViewModel(application) {
-    var srcWord by mutableStateOf(TextFieldValue(text = ""))
-    var srcWordDisplay by mutableStateOf("")
-    var targetWordDisplay by mutableStateOf("")
+//    var srcWord by mutableStateOf(TextFieldValue(text = ""))
+//    var srcWordDisplay by mutableStateOf("Nacht")
+//    var targetWordDisplay by mutableStateOf("")
+    var srcWord by mutableStateOf(TextFieldValue(text = loremIpsum))
+    var srcWordDisplay by mutableStateOf(loremIpsum)
+    var targetWordDisplay by mutableStateOf(loremIpsum)
     val ioScope = CoroutineScope(Dispatchers.IO)
     var expanded by mutableStateOf(true)
     // FIXME: Failed attempted to access the clipboard from within the View model
 //    val clipboardManager = application.getSystemService(Service.CLIPBOARD_SERVICE) as ClipboardManager
 //    private val clipboardContent = clipboardManager.primaryClip?.getItemAt(0)?.text.toString()
     val loadedPronunciations = mutableStateMapOf<String, List<Pair<String, String>>>()
-//    val loadedPronunciations = mutableMapOf("" to listOf(("einem" to ""), ("seit einema monat" to ""), ("einem" to ""), ("seit einem monat" to ""), ("seit einem monat" to "")))
+//    val loadedPronunciations = mutableStateMapOf("" to listOf(("einem" to ""), ("seit einema monat" to ""), ("einem" to ""), ("seit einem monat" to ""), ("seit einem monat" to "")))
 
     /**
      * Translate the current value of the text field.
@@ -115,3 +114,5 @@ enum class FORVO_LANGUAGE(
     FRENCH("French", "fr"),
     GERMAN("German", "de")
 }
+val loremIpsum = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
+

@@ -69,7 +69,8 @@ class ForvoPronunciationKtTest {
     @Test
     fun firstPronunciation() {
         runBlocking {
-            listOf("einem", "nacht", "bett", "daddy", "@!#$@!#$").forEach {word ->
+            listOf("sieh dir an, was du verpasst \n noch", "einem", "nacht", "bett", "daddy", "@!#$@!#$", "inckognitotab", "eingaben").map { it.replace("\n", "") }.forEach {word ->
+                println(word)
                 listOf(false, true, true, true, true, true).forEach { choice ->
                     println(FloatingBubbleViewModel().grabAudioFile(
                         searchTerm = word,

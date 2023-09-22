@@ -1,21 +1,25 @@
 package com.polendina.knounce.presentation.shared.floatingbubble
 
-import android.app.Application
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,11 +27,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.polendina.knounce.PronunciationPlayer
+import com.polendina.knounce.presentation.shared.floatingbubble.components.SearchWordExpandedComposable
 
 @Composable
 fun ExpandedCompose(
@@ -56,46 +63,44 @@ fun ExpandedCompose(
             modifier = Modifier
                 .clip(RoundedCornerShape(30.dp))
                 .background(MaterialTheme.colorScheme.secondaryContainer)
-                .width(350.dp)
-                .wrapContentHeight()
                 .clickable {}
+                .weight(
+                    weight = 1f,
+                    fill = false
+                )
         ) {
             Column (
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .padding(10.dp)
-                    .fillMaxWidth()
-                    .wrapContentHeight()
             ) {
                 ExpandedBubbleHeader()
                 AnimatedVisibility(visible = floatingBubbleViewModel.expanded) {
-                    Column {
-                        ExpandedBubbleBody(
-                            srcWord = floatingBubbleViewModel.srcWordDisplay,
-                            targetWord = floatingBubbleViewModel.targetWordDisplay,
-                            onSrcCardClick = {
-                                floatingBubbleViewModel.expanded = false
-                            },
-                            copySrcLanguage = {
-                                floatingBubbleViewModel.playAudio(
-                                    searchTerm = it,
-                                    shuffle = true
-                                )
-                            },
-                            playSrcLanguage = {
-                                floatingBubbleViewModel.playAudio(
-                                    searchTerm = it,
-                                    shuffle = false
-                                )
-                            },
-                            copyTargetLanguage = {},
-                            playTargetLanguage = {},
-                            audios = floatingBubbleViewModel.loadedPronunciations.get(floatingBubbleViewModel.srcWordDisplay) ?: emptyList(),
-                            audioClicked = {
-                                PronunciationPlayer.playRemoteAudio(it.second)
-                            }
-                        )
-                    }
+                    ExpandedBubbleBody(
+                        srcWord = floatingBubbleViewModel.srcWordDisplay,
+                        targetWord = floatingBubbleViewModel.targetWordDisplay,
+                        onSrcCardClick = {
+                            floatingBubbleViewModel.expanded = false
+                        },
+                        copySrcLanguage = {
+                            floatingBubbleViewModel.playAudio(
+                                searchTerm = it,
+                                shuffle = true
+                            )
+                        },
+                        playSrcLanguage = {
+                            floatingBubbleViewModel.playAudio(
+                                searchTerm = it,
+                                shuffle = false
+                            )
+                        },
+                        copyTargetLanguage = {},
+                        playTargetLanguage = {},
+                        audios = floatingBubbleViewModel.loadedPronunciations.get(floatingBubbleViewModel.srcWordDisplay) ?: emptyList(),
+                        audioClicked = {
+                            PronunciationPlayer.playRemoteAudio(it.second)
+                        }
+                    )
                 }
                 AnimatedVisibility(visible = !floatingBubbleViewModel.expanded) {
                     SearchWordExpandedComposable(
@@ -103,10 +108,13 @@ fun ExpandedCompose(
                         onWordChange = {
                             floatingBubbleViewModel.srcWord = it
                         },
-                        goToArrow = {
+                        goToArrowCallback = {
                             floatingBubbleViewModel.expanded = true
                             floatingBubbleViewModel.srcWordDisplay = floatingBubbleViewModel.srcWord.text
                             floatingBubbleViewModel.translateWord()
+                        },
+                        clearArrowCallback = {
+                            floatingBubbleViewModel.srcWord = TextFieldValue("")
                         },
                         modifier = Modifier
                             .focusRequester(focusRequester = focusRequester)
@@ -123,7 +131,7 @@ fun ExpandedCompose(
             }
         }
         if (floatingBubbleViewModel.expanded) {
-            ExpandedBubbleFooter(
+            BubbleDisplayFooter(
                 close = {
                     minimize()
                 },
