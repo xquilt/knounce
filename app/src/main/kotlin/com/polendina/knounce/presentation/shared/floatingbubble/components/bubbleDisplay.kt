@@ -7,7 +7,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -24,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.PlayCircleOutline
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material3.Card
@@ -39,9 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.polendina.knounce.R
 import com.polendina.knounce.ui.theme.SearchFieldFontStyle
 
 @Composable
@@ -105,7 +103,7 @@ fun ExpandedBubbleBody(
     onSrcCardClick: () -> Unit,
     srcWord: String,
     targetWord: String,
-    copySrcLanguage: (String) -> Unit,
+    history: (String) -> Unit,
     playSrcLanguage: (String) -> Unit,
     copyTargetLanguage: (String) -> Unit,
     playTargetLanguage: (String) -> Unit,
@@ -116,11 +114,11 @@ fun ExpandedBubbleBody(
     Column {
         DisplayCard(
             text = srcWord,
-            copyTextCallback = copySrcLanguage,
+            copyTextCallback = history,
             playAudioCallback = playSrcLanguage,
             onCardClick = onSrcCardClick,
             color = MaterialTheme.colorScheme.onBackground,
-            firstImageVector = Icons.Default.Shuffle,
+            firstImageVector = Icons.Default.History,
             secondImageVector = Icons.Default.PlayCircleOutline,
             modifier = Modifier
                 .weight(

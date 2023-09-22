@@ -21,12 +21,12 @@ import trancore.corelib.pronunciation.retrofitInstance
 class FloatingBubbleViewModel(
     application: Application = Application()
 ) : AndroidViewModel(application) {
-//    var srcWord by mutableStateOf(TextFieldValue(text = ""))
-//    var srcWordDisplay by mutableStateOf("Nacht")
-//    var targetWordDisplay by mutableStateOf("")
-    var srcWord by mutableStateOf(TextFieldValue(text = loremIpsum))
-    var srcWordDisplay by mutableStateOf(loremIpsum)
-    var targetWordDisplay by mutableStateOf(loremIpsum)
+    var srcWord by mutableStateOf(TextFieldValue(""))
+    var srcWordDisplay by mutableStateOf("")
+    var targetWordDisplay by mutableStateOf("")
+//    var srcWord by mutableStateOf(TextFieldValue(text = loremIpsum))
+//    var srcWordDisplay by mutableStateOf(loremIpsum)
+//    var targetWordDisplay by mutableStateOf(loremIpsum)
     val ioScope = CoroutineScope(Dispatchers.IO)
     var expanded by mutableStateOf(true)
     // FIXME: Failed attempted to access the clipboard from within the View model
@@ -56,52 +56,52 @@ class FloatingBubbleViewModel(
      * Grab the appropriate direct audio file URL.
      *
      * @param searchTerm The word to be pronounced.
-     * @param shuffle Determine whether to play a the single first pronunciation, or shuffle randomly through available pronunciations.
      */
-    suspend fun grabAudioFile(
-        searchTerm: String,
-        shuffle: Boolean
-    ): String {
-        var url = ""
-        loadedPronunciations.get(searchTerm)?.let {
-            url = if (shuffle) it.random().second else it.first().second
-        }
+    suspend fun grabAudioFiles(
+        searchTerm: String
+    ): List<Pair<String, String>> {
         retrofitInstance.wordPronunciations(
             word = searchTerm,
             interfaceLanguageCode = UserLanguages.ENGLISH.code,
             languageCode = FORVO_LANGUAGE.GERMAN.code
         ).execute().let {
             try {
-                it.body()?.data?.first()?.items?.map {item ->
+                return it.body()?.data?.first()?.items?.map {item ->
                     item.original to
                     Gson().fromJson(
                         item.standard_pronunciation,
                         Item.StandardPronunciation::class.java
                     ).realmp3
-                }?.let {
-                    loadedPronunciations.put(searchTerm, it)
-                    url = if (shuffle) it.random().second else it.first().second
-                }
+                } ?: emptyList()
             } catch (e: NoSuchElementException) {}
         }
-        return(url)
+        return (emptyList())
+    }
+
+    fun loadPronunciations(
+        searchTerm: String
+    ) {
+        if (!loadedPronunciations.contains(searchTerm)) {
+            ioScope.launch {
+                grabAudioFiles(searchTerm = searchTerm).let {
+                    loadedPronunciations.put(searchTerm, it)
+                }
+            }
+        }
     }
 
     /**
      * Play remote pronunciation audio.
      *
-     * @param searchTerm: String,
-     * @param shuffle: Boolean
+     * @param searchTerm: The word to play its pronunciation.
     */
     fun playAudio(
-        searchTerm: String,
-        shuffle: Boolean
-    )  {
+        searchTerm: String
+    ) {
         ioScope.launch {
-            PronunciationPlayer.playRemoteAudio(grabAudioFile(
-                searchTerm = searchTerm,
-                shuffle = shuffle
-            ))
+            loadedPronunciations.get(searchTerm)?.firstOrNull()?.second?.let {audioUrl ->
+                PronunciationPlayer.playRemoteAudio(audioUrl)
+            }
         }
     }
 
@@ -114,5 +114,5 @@ enum class FORVO_LANGUAGE(
     FRENCH("French", "fr"),
     GERMAN("German", "de")
 }
-val loremIpsum = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
+const val LOREM_IPSUM = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
 

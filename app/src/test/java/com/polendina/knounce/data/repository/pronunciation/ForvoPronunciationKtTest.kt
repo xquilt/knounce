@@ -72,9 +72,8 @@ class ForvoPronunciationKtTest {
             listOf("sieh dir an, was du verpasst \n noch", "einem", "nacht", "bett", "daddy", "@!#$@!#$", "inckognitotab", "eingaben").map { it.replace("\n", "") }.forEach {word ->
                 println(word)
                 listOf(false, true, true, true, true, true).forEach { choice ->
-                    println(FloatingBubbleViewModel().grabAudioFile(
-                        searchTerm = word,
-                        shuffle = choice
+                    println(FloatingBubbleViewModel().grabAudioFiles(
+                        searchTerm = word
                     ))
                 }
                 println()
