@@ -1,25 +1,29 @@
 package com.polendina.knounce.data.repository.pronunciation
 
-import androidx.compose.ui.platform.isDebugInspectorInfoEnabled
-import com.google.gson.Gson
-import com.polendina.knounce.PronunciationPlayer
-import com.polendina.knounce.domain.model.FromToResponse
-import com.polendina.knounce.domain.model.Item
-import com.polendina.knounce.domain.model.LanguageCodes
-import com.polendina.knounce.domain.model.Pronunciations
 import com.polendina.knounce.domain.model.UserLanguages
-import com.polendina.knounce.presentation.shared.floatingbubble.FORVO_LANGUAGE
 import com.polendina.knounce.presentation.shared.floatingbubble.FloatingBubbleViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import me.bush.translator.Language
 import me.bush.translator.Translator
+import org.junit.jupiter.api.BeforeEach
 
-import org.junit.Test
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import org.junit.jupiter.api.Test
 import trancore.corelib.pronunciation.retrofitInstance
-import kotlin.random.Random
+
+private val words = listOf(
+    Pair("einem", "one"),
+    Pair("nacht", "night"),
+    Pair("daddy", "daddy"),
+    Pair("@!#$@!#$", "@!#$@!#$"),
+    Pair("inckognitotab", "incognito tab"),
+    Pair("eingaben", "inputs"),
+    Pair("sieh dir an, was du verpasst", "see what you're missing")
+)
 
 class ForvoPronunciationKtTest {
 
@@ -69,7 +73,7 @@ class ForvoPronunciationKtTest {
     @Test
     fun firstPronunciation() {
         runBlocking {
-            listOf("sieh dir an, was du verpasst \n noch", "einem", "nacht", "bett", "daddy", "@!#$@!#$", "inckognitotab", "eingaben").map { it.replace("\n", "") }.forEach {word ->
+            words.map { it.first } .map { it.replace("\n", "") }.forEach {word ->
                 println(word)
                 listOf(false, true, true, true, true, true).forEach { choice ->
                     println(FloatingBubbleViewModel().grabAudioFiles(
@@ -85,19 +89,35 @@ class ForvoPronunciationKtTest {
 
 class GoogleTranslationTest {
 
+    private lateinit var floatingBubbleViewModel: FloatingBubbleViewModel
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @BeforeEach
+    fun setup() {
+        floatingBubbleViewModel = FloatingBubbleViewModel()
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+    }
+
     @Test
-    fun wordTranslatorTest() {
-        runBlocking {
-            listOf("game", "Hello", "welcome").forEach {
-                Translator().translate(
-                    text = it,
-                    source = Language.AUTO,
-                    target = Language.GERMAN,
-                ).apply {
-                    println(this.translatedText)
-                }
-            }
+    fun translateWordTest() = runTest {
+        words.map {
+            floatingBubbleViewModel.srcWordDisplay = it.first
+            floatingBubbleViewModel.translateWord().join()
+            assert(it.second == floatingBubbleViewModel.targetWordDisplay)
         }
     }
 
+    @Test
+    fun wordTranslatorTest() = runTest {
+        println(words.map { it.first }.map {
+            Pair(
+                it,
+                Translator().translate(
+                    text = it,
+                    source = Language.GERMAN,
+                    target = Language.ENGLISH,
+                ).translatedText
+            )
+        })
+    }
 }

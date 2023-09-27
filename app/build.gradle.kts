@@ -64,10 +64,10 @@ dependencies {
 //    implementation(libs.material3)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.runtime.ktx)
-    testImplementation(libs.junit)
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.retrofit2:converter-scalars:2.1.0")
+
     val lifecycle_version = "2.6.1"
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
@@ -81,35 +81,23 @@ dependencies {
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
 
-    // Floating chatead
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+    testImplementation (libs.kotlinx.coroutines.test)
+
     implementation("io.github.torrydo:floating-bubble-view:0.6.3")
-
-    // Icons
     implementation("androidx.compose.material:material-icons-extended:1.6.0-alpha01")
-
-    // Google translate
     implementation("com.github.therealbush:translator:1.0.2")
 
-    // Local Unit tests
-    testImplementation("androidx.test:core:1.5.0")
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("androidx.arch.core:core-testing:2.1.0")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    testImplementation("com.google.truth:truth:1.1.3")
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.9.1")
-//    testImplementation("io.mockk:mockk:1.10.5")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.1.0-alpha04")
+    // Junit5
+//    testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
+//    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
+//    testImplementation(libs.junit)
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.3")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.3")
 
-    // Instrumentation tests
-    androidTestImplementation("com.google.dagger:hilt-android-testing:2.37")
-    androidTestImplementation("junit:junit:4.13.2")
-    androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.1")
-    androidTestImplementation("androidx.arch.core:core-testing:2.1.0")
-    androidTestImplementation("com.google.truth:truth:1.1.3")
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test:core-ktx:1.4.0")
-    androidTestImplementation("com.squareup.okhttp3:mockwebserver:4.9.1")
-//    androidTestImplementation("io.mockk:mockk-android:1.10.5")
-    androidTestImplementation("androidx.test:runner:1.4.0")
+}
 
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
