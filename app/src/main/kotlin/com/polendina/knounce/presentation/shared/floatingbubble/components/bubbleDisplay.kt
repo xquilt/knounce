@@ -26,7 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.LayersClear
 import androidx.compose.material.icons.filled.PlayCircleOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -130,7 +130,7 @@ fun ExpandedBubbleBody(
             text = srcWordDisplay,
             copyTextCallback = history,
             playAudioCallback = playSrcLanguage,
-            firstImageVector = Icons.Default.History,
+            firstImageVector = Icons.Default.LayersClear, // TODO: Probably it's better to have some long-press functionality on the src word display portion, that preview a deletion prompt of some kind.
             secondImageVector = Icons.Default.PlayCircleOutline,
             color = MaterialTheme.colorScheme.onBackground
         )

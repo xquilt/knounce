@@ -1,6 +1,7 @@
 package com.polendina.knounce.presentation.shared.floatingbubble
 
 import android.app.Application
+import com.google.gson.stream.MalformedJsonException
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -37,7 +38,6 @@ class FloatingBubbleViewModel(
 //    private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : AndroidViewModel(application) {
     var srcWord by mutableStateOf(TextFieldValue(""))
-    var srcWordDisplay by mutableStateOf("")
     var targetWordDisplay by mutableStateOf("")
 
     //    var srcWord by mutableStateOf(TextFieldValue(text = loremIpsum))
@@ -54,36 +54,31 @@ class FloatingBubbleViewModel(
     var pageIndex by mutableIntStateOf(0)
 
     /**
-     * Callback function called when the search button is pressed at the search bubble.
+     * Callback function that's invoked when searching a word, in order to load its pronunciations
+     * and translations.
      */
-    fun goToArrowCallback() {
-        addWord()
+    fun searchWord(
+        word: String
+    ) {
+        // Instantly add a Word synchronously, to avoid unnecessary null checks and race conditions with translation & pronunciations network requests.
+        if (words.find { it.title == word } == null) words.add(Word(title = word))
         pageIndex = words.lastIndex
         currentWord = words[pageIndex]
         expanded = true
-        srcWordDisplay = srcWord.text
-        translateWord()
-        loadPronunciations(
-            searchTerm = srcWord.text
-        )
-    }
-
-    /**
-     * Instantly add a Word synchronously, to avoid unnecessary null checks and race conditions
-     * with translation & pronunciations network requests.
-     *
-     */
-    fun addWord() {
-        if (words.find { it.title == srcWord.text } == null) words.add(Word(title = srcWord.text))
+        currentWord.title?.let {
+            translateWord(word = it)
+            loadPronunciations(searchTerm = it)
+        }
     }
 
     /**
      * Translate the current value of the text field, then modify the ViewModel internal states.
      *
      */
-    fun translateWord() = viewModelScope.launch {
+    // TODO: Add the ability to display auto-corrections for malformed words inputted by the user.
+    fun translateWord(word: String) = viewModelScope.launch {
         currentWord.translation = Translator().translate(
-            text = srcWordDisplay,
+            text = word,
             source = Language.GERMAN,
             target = Language.ENGLISH
         ).translatedText
@@ -98,7 +93,7 @@ class FloatingBubbleViewModel(
     suspend fun grabAudioFiles(
         searchTerm: String
     ): List<Pair<String, String>> = retrofitInstance.wordPronunciations(
-            word = searchTerm,
+            word = searchTerm.refine(),
             interfaceLanguageCode = UserLanguages.ENGLISH.code,
             languageCode = FORVO_LANGUAGE.GERMAN.code
         ).awaitResponse().run {
@@ -128,10 +123,9 @@ class FloatingBubbleViewModel(
     fun playAudio(
         searchTerm: String
     ) {
-        words
-            .find { it.title == srcWordDisplay }
-            ?.pronunciations
-            ?.find { it.first == searchTerm }
+        currentWord
+            .pronunciations
+            .find { it.first == searchTerm }
             ?.let {
                 viewModelScope.launch {
                     PronunciationPlayer.playRemoteAudio(it.second)
@@ -140,6 +134,8 @@ class FloatingBubbleViewModel(
     }
 
 }
+
+fun String.refine() = this.replace("\n", "")
 
 enum class FORVO_LANGUAGE(
     val title: String,

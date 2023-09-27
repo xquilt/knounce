@@ -100,8 +100,7 @@ class GoogleTranslationTest {
     @Test
     fun translateWordTest() = runTest {
         words.map {
-            floatingBubbleViewModel.srcWordDisplay = it.first
-            floatingBubbleViewModel.translateWord().join()
+            floatingBubbleViewModel.translateWord(word = it.first).join()
             assert(it.second == floatingBubbleViewModel.targetWordDisplay)
         }
     }

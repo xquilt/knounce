@@ -23,10 +23,7 @@ class FloatingBubbleService: ExpandableBubbleService() {
                 text = copiedString,
                 selection = TextRange(copiedString.length)
             )
-            floatingBubbleViewModel.expanded = true
-            floatingBubbleViewModel.srcWordDisplay = copiedString
-            floatingBubbleViewModel.translateWord()
-            floatingBubbleViewModel.loadPronunciations(searchTerm = copiedString)
+            floatingBubbleViewModel.searchWord(word = copiedString)
         }
         minimize()
     }

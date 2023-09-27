@@ -104,7 +104,9 @@ fun ExpandedCompose(
                             floatingBubbleViewModel.srcWord = it
                         },
                         goToArrowCallback = {
-                            floatingBubbleViewModel.goToArrowCallback()
+                            floatingBubbleViewModel.searchWord(
+                                word = floatingBubbleViewModel.srcWord.text
+                            )
                         },
                         clearArrowCallback = {
                             floatingBubbleViewModel.srcWord = TextFieldValue("")
