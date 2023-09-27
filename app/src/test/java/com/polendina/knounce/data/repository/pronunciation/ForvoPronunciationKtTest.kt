@@ -80,7 +80,6 @@ class ForvoPronunciationKtTest {
                         searchTerm = word
                     ))
                 }
-                println()
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.polendina.knounce.presentation.shared.floatingbubble
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -27,6 +29,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.polendina.knounce.PronunciationPlayer
 import com.polendina.knounce.presentation.shared.floatingbubble.components.SearchWordExpandedComposable
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ExpandedCompose(
     minimize: () -> Unit = {},
@@ -67,14 +70,14 @@ fun ExpandedCompose(
             ) {
                 ExpandedBubbleHeader()
                 AnimatedVisibility(visible = floatingBubbleViewModel.expanded) {
+                    val horizontalPagerState = rememberPagerState(initialPage = floatingBubbleViewModel.pageIndex) { if (floatingBubbleViewModel.words.isEmpty()) 1 else floatingBubbleViewModel.words.size }
                     ExpandedBubbleBody(
-                        srcWord = floatingBubbleViewModel.srcWordDisplay,
-                        targetWord = floatingBubbleViewModel.targetWordDisplay,
+                        srcWordDisplay = floatingBubbleViewModel.currentWord.title ?: "",
+                        targetWordDisplay = floatingBubbleViewModel.currentWord.translation ?: "",
                         onSrcCardClick = {
                             floatingBubbleViewModel.expanded = false
                         },
-                        history = {
-                        },
+                        history = {},
                         playSrcLanguage = {
                             floatingBubbleViewModel.playAudio(
                                 searchTerm = it
@@ -82,10 +85,16 @@ fun ExpandedCompose(
                         },
                         copyTargetLanguage = {},
                         playTargetLanguage = {},
-                        audios = floatingBubbleViewModel.loadedPronunciations.get(floatingBubbleViewModel.srcWordDisplay) ?: emptyList(),
+                        audios = floatingBubbleViewModel.currentWord.pronunciations,
                         audioClicked = {
                             PronunciationPlayer.playRemoteAudio(it.second)
-                        }
+                        },
+                        onExpandedCardSwipe = {
+                            floatingBubbleViewModel.pageIndex = horizontalPagerState.currentPage
+                            floatingBubbleViewModel.currentWord = floatingBubbleViewModel.words.getOrNull(floatingBubbleViewModel.pageIndex) ?: Word()
+                            floatingBubbleViewModel.srcWord = TextFieldValue(floatingBubbleViewModel.currentWord.title ?: "")
+                        },
+                        horizontalPagerState = horizontalPagerState
                     )
                 }
                 AnimatedVisibility(visible = !floatingBubbleViewModel.expanded) {
@@ -95,12 +104,7 @@ fun ExpandedCompose(
                             floatingBubbleViewModel.srcWord = it
                         },
                         goToArrowCallback = {
-                            floatingBubbleViewModel.expanded = true
-                            floatingBubbleViewModel.srcWordDisplay = floatingBubbleViewModel.srcWord.text
-                            floatingBubbleViewModel.translateWord()
-                            floatingBubbleViewModel.loadPronunciations(
-                                searchTerm = floatingBubbleViewModel.srcWordDisplay
-                            )
+                            floatingBubbleViewModel.goToArrowCallback()
                         },
                         clearArrowCallback = {
                             floatingBubbleViewModel.srcWord = TextFieldValue("")
