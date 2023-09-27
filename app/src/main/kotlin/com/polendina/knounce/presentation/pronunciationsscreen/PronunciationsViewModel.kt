@@ -15,7 +15,7 @@ import com.polendina.knounce.domain.model.Pronunciations
 import com.polendina.knounce.domain.model.UserLanguages
 
 class PronunciationsViewModel(
-    application: Application = Application()
+    application: Application = Application(),
 //    private val pronunciationRepository: ForvoPronunciation // its methods were getting skipped over when called down below
 //): ViewModel() {
 ): AndroidViewModel(application) {
@@ -32,7 +32,6 @@ class PronunciationsViewModel(
 
     var showImage by mutableStateOf(false)
 
-    // Handle business logic
     fun updateQuery(newQuery: String) {
         this.query.value = newQuery
     }

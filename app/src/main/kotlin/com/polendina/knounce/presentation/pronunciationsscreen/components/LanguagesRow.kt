@@ -1,5 +1,6 @@
 package com.polendina.knounce.presentation.pronunciationsscreen.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,7 +30,7 @@ import com.polendina.knounce.presentation.pronunciationsscreen.LanguageSelected
 
 @Composable
 fun LanguagesRow(
-    languages: List<LanguageSelected>,
+    languages: SnapshotStateList<LanguageSelected>,
     onLanguageBoxClick: (LanguageSelected) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -38,6 +41,7 @@ fun LanguagesRow(
             .height(40.dp)
             .fillMaxWidth()
     ) {
+        Log.d("Composition", "Composed")
         items(languages) {
             Box (
                 contentAlignment = Alignment.Center,
@@ -74,7 +78,7 @@ fun LanguagesRowPreview() {
         verticalArrangement = Arrangement.Center
     ) {
         LanguagesRow(
-            languages = listOf("Arabic", "English", "French", "Spanish", "Interlingua").map { LanguageSelected(it, it.contains("i").not() ) },
+            languages = listOf("Arabic", "English", "French", "Spanish", "Interlingua").map { LanguageSelected(it, it.contains("i").not() ) }.toMutableStateList(),
             onLanguageBoxClick = {}
         )
     }
