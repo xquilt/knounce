@@ -1,5 +1,6 @@
 package com.polendina.knounce.presentation.shared.floatingbubble
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -15,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.polendina.knounce.PronunciationPlayer
 import com.polendina.knounce.presentation.shared.floatingbubble.components.SearchWordExpandedComposable
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -38,6 +41,7 @@ fun ExpandedCompose(
 ) {
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val coroutineScope = rememberCoroutineScope()
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -45,9 +49,7 @@ fun ExpandedCompose(
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
-            ) {
-                minimize()
-            }
+            ) { minimize() }
             .padding(
                 horizontal = 10.dp,
                 vertical = 10.dp
@@ -57,7 +59,11 @@ fun ExpandedCompose(
             modifier = Modifier
                 .clip(RoundedCornerShape(30.dp))
                 .background(MaterialTheme.colorScheme.secondaryContainer)
-                .clickable {}
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {}
+                )
                 .weight(
                     weight = 1f,
                     fill = false
@@ -75,7 +81,14 @@ fun ExpandedCompose(
                         srcWordDisplay = floatingBubbleViewModel.currentWord.title ?: "",
                         targetWordDisplay = floatingBubbleViewModel.currentWord.translation ?: "",
                         onSrcCardClick = {
+                            Log.d("MORE", "minimized!")
                             floatingBubbleViewModel.expanded = false
+                        },
+                        onSrcCardWordClick = {
+                            floatingBubbleViewModel.searchWord(it)
+                            coroutineScope.launch {
+                                horizontalPagerState.animateScrollToPage(floatingBubbleViewModel.pageIndex)
+                            }
                         },
                         history = {},
                         playSrcLanguage = {
@@ -97,6 +110,7 @@ fun ExpandedCompose(
                         horizontalPagerState = horizontalPagerState
                     )
                 }
+                // FIXME: When the expanded view is clicked, it opens up the search bubble, but the cursor is located at the beginning.
                 AnimatedVisibility(visible = !floatingBubbleViewModel.expanded) {
                     SearchWordExpandedComposable(
                         srcWord = floatingBubbleViewModel.srcWord,

@@ -23,6 +23,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
@@ -42,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.polendina.knounce.ui.theme.SearchFieldFontStyle
 
@@ -49,6 +51,7 @@ import com.polendina.knounce.ui.theme.SearchFieldFontStyle
 fun DisplayCard(
     text: String,
     onCardClick: () -> Unit = {},
+    onSrcCardWordClick: (String) -> Unit = {},
     color: Color,
     modifier: Modifier = Modifier,
 ) {
@@ -65,10 +68,13 @@ fun DisplayCard(
                 onClick = onCardClick
             )
     ) {
-        Text(
-            text = text,
+        ClickableText(
+            text = AnnotatedString(text),
             style = SearchFieldFontStyle(),
-            color = color,
+            onClick = {offset ->
+                onSrcCardWordClick(text.wordByCharIndex(index = offset))
+            },
+//            color = color, // FIXME: I have no idea how to set color for AnnotatedString
             modifier = Modifier
                 .verticalScroll(rememberScrollState(0))
         )
@@ -113,6 +119,7 @@ fun MediaControlsRow(
 @Composable
 fun ExpandedBubbleBody(
     onSrcCardClick: () -> Unit,
+    onSrcCardWordClick: (String) -> Unit,
     srcWordDisplay: String,
     targetWordDisplay: String,
     history: (String) -> Unit,
@@ -138,6 +145,7 @@ fun ExpandedBubbleBody(
             DisplayCard(
                 text = srcWordDisplay,
                 onCardClick = onSrcCardClick,
+                onSrcCardWordClick = onSrcCardWordClick,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier
                     .weight(

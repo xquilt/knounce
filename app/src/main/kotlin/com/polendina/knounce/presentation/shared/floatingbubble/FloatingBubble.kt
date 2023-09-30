@@ -27,7 +27,7 @@ class FloatingBubbleService: ExpandableBubbleService() {
         }
         minimize()
     }
-    override fun configBubble(): BubbleBuilder? {
+    override fun configBubble(): BubbleBuilder {
         return BubbleBuilder(this)
             .bubbleCompose {
                 BubbleCompose(
