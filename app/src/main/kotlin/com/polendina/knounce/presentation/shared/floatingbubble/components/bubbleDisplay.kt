@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,6 +48,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.polendina.knounce.ui.theme.SearchFieldFontStyle
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DisplayCard(
     text: String,
@@ -62,10 +64,13 @@ fun DisplayCard(
         modifier = modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = 140.dp)
-            .clickable(
+            .combinedClickable(
+                enabled = true,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = onCardClick
+                onClick = onCardClick,
+                onDoubleClick = onCardClick,
+                onLongClick = onCardClick
             )
     ) {
         ClickableText(
