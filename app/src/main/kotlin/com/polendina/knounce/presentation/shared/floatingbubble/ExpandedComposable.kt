@@ -24,6 +24,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -78,8 +79,8 @@ fun ExpandedCompose(
                 AnimatedVisibility(visible = floatingBubbleViewModel.expanded) {
                     val horizontalPagerState = rememberPagerState(initialPage = floatingBubbleViewModel.pageIndex) { if (floatingBubbleViewModel.words.isEmpty()) 1 else floatingBubbleViewModel.words.size }
                     ExpandedBubbleBody(
-                        srcWordDisplay = floatingBubbleViewModel.currentWord.title ?: "",
-                        targetWordDisplay = floatingBubbleViewModel.currentWord.translation ?: "",
+                        srcWordDisplay = floatingBubbleViewModel.currentWord.title,
+                        targetWordDisplay = floatingBubbleViewModel.currentWord.translation,
                         onSrcCardClick = {
                             Log.d("MORE", "minimized!")
                             floatingBubbleViewModel.expanded = false
@@ -105,12 +106,14 @@ fun ExpandedCompose(
                         onExpandedCardSwipe = {
                             floatingBubbleViewModel.pageIndex = horizontalPagerState.currentPage
                             floatingBubbleViewModel.currentWord = floatingBubbleViewModel.words.getOrNull(floatingBubbleViewModel.pageIndex) ?: Word()
-                            floatingBubbleViewModel.srcWord = TextFieldValue(floatingBubbleViewModel.currentWord.title ?: "")
+                            floatingBubbleViewModel.srcWord = TextFieldValue(
+                                text = floatingBubbleViewModel.currentWord.title,
+                                selection = TextRange(floatingBubbleViewModel.currentWord.title.length)
+                            )
                         },
                         horizontalPagerState = horizontalPagerState
                     )
                 }
-                // FIXME: When the expanded view is clicked, it opens up the search bubble, but the cursor is located at the beginning.
                 AnimatedVisibility(visible = !floatingBubbleViewModel.expanded) {
                     SearchWordExpandedComposable(
                         srcWord = floatingBubbleViewModel.srcWord,
