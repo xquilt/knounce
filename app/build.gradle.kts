@@ -74,10 +74,8 @@ dependencies {
     // ViewModel utilities for Compose
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
-    androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(platform(libs.compose.bom))
-    androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
 
@@ -93,8 +91,10 @@ dependencies {
 //    testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
 //    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
 //    testImplementation(libs.junit)
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.3")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.3")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+//    androidTestImplementation(libs.androidx.test.ext.junit)
+//    androidTestImplementation(libs.ui.test.junit4)
 
 }
 

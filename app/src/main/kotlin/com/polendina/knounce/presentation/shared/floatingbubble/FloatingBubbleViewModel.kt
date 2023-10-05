@@ -15,15 +15,18 @@ import com.google.gson.Gson
 import com.polendina.knounce.PronunciationPlayer
 import com.polendina.knounce.domain.model.Item
 import com.polendina.knounce.domain.model.UserLanguages
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import me.bush.translator.Language
 import me.bush.translator.Translator
 import retrofit2.awaitResponse
 import trancore.corelib.pronunciation.retrofitInstance
+import java.io.IOException
+import java.net.SocketTimeoutException
 
 class Word(
-    title: String? = null,
-    translation: String? = null,
+    title: String = "",
+    translation: String = "",
     pronunciations: List<Pair<String, String>> = listOf()
 ) {
     var title by mutableStateOf(title)
@@ -71,12 +74,17 @@ class FloatingBubbleViewModel(
                 currentWord = words[insertIndex]
                 expanded = true
                 currentWord.title?.let {
-                    translateWord(word = it)
-                    loadPronunciations(searchTerm = it)
+                    try {
+                        translateWord(word = it)
+                        loadPronunciations(searchTerm = it)
+                    } catch (e: SocketTimeoutException) {
+                        e.printStackTrace(); println(e.cause)
+                    } catch (_: IOException) {}
                 }
             } else {
                 currentWord = it
                 pageIndex = words.indexOf(it)
+                expanded = true
                 return
             }
         }
@@ -89,11 +97,13 @@ class FloatingBubbleViewModel(
     // TODO: Add the ability to display auto-corrections for malformed words inputted by the user.
     fun translateWord(word: String) = viewModelScope.launch {
         // FIXME: Under certain conditions it raises an exception. When attempting to parse a lengthy paragraph with wordvomit within. IllegalArgumentException
-        currentWord.translation = Translator().translate(
-            text = word,
-            source = Language.GERMAN,
-            target = Language.ENGLISH
-        ).translatedText
+        try {
+            currentWord.translation = Translator().translate(
+                text = word,
+                source = Language.GERMAN,
+                target = Language.ENGLISH
+            ).translatedText
+        } catch (e: IllegalArgumentException) { e.printStackTrace(); println(e.cause) }
     }
 
     /**
@@ -145,9 +155,12 @@ class FloatingBubbleViewModel(
             }
     }
 
-}
+    override fun onCleared() {
+        super.onCleared()
+        viewModelScope.cancel()
+    }
 
-fun String.refine() = this.replace("\n", "")
+}
 
 enum class FORVO_LANGUAGE(
     val title: String,
@@ -157,6 +170,9 @@ enum class FORVO_LANGUAGE(
     GERMAN("German", "de")
 }
 const val LOREM_IPSUM = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
+
+// TODO: It should exclude other characters e.g., emojis, etc.
+fun String.refine() = this.replace("\n", "")
 fun String.wordByCharIndex(index: Int): String {
     if (index !in 0..this.length || this.getOrNull(index)?.isWhitespace() ?: false) return ""
     return(this.split(" ")[this.substring(0, index).count { it == ' ' }])

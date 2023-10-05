@@ -47,7 +47,10 @@ fun PronunciationsScreen(
                 },
                 onTrailingIconClick = { /*TODO*/ },
                 modifier = Modifier
-                    .padding(vertical = 10.dp)
+                    .padding(
+                        vertical = 10.dp,
+                        horizontal = 10.dp
+                    )
                     .height(70.dp)
             )
         }
