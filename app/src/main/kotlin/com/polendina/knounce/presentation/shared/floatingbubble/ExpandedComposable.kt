@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.polendina.knounce.PronunciationPlayer
+import com.polendina.knounce.domain.model.Word
 import com.polendina.knounce.presentation.shared.floatingbubble.components.SearchWordExpandedComposable
 import kotlinx.coroutines.launch
 
@@ -91,7 +92,9 @@ fun ExpandedCompose(
                                 horizontalPagerState.animateScrollToPage(floatingBubbleViewModel.pageIndex)
                             }
                         },
-                        history = {},
+                        history = {
+                            floatingBubbleViewModel.saveWordsToDb(floatingBubbleViewModel.currentWord)
+                        },
                         playSrcLanguage = {
                             floatingBubbleViewModel.playAudio(
                                 searchTerm = it
@@ -99,7 +102,8 @@ fun ExpandedCompose(
                         },
                         copyTargetLanguage = {},
                         playTargetLanguage = {},
-                        audios = floatingBubbleViewModel.currentWord.pronunciations,
+                        // TODO: Have a loading effects for pronunciations chips & translation, till it's retrieved!
+                        audios = floatingBubbleViewModel.currentWord.pronunciations?.foo() ?: emptyList(),
                         audioClicked = {
                             PronunciationPlayer.playRemoteAudio(it.second)
                         },

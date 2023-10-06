@@ -12,11 +12,13 @@ import com.torrydo.floatingbubbleview.service.expandable.BubbleBuilder
 import com.torrydo.floatingbubbleview.service.expandable.ExpandableBubbleService
 import com.torrydo.floatingbubbleview.service.expandable.ExpandedBubbleBuilder
 
-class FloatingBubbleService: ExpandableBubbleService() {
-    val floatingBubbleViewModel = FloatingBubbleViewModel() // TODO: having the viewModel instantiated here, because I wanted to access the System clipboard service, to get the copied text (I couldn't access the CLIPBOARD_SERVICE from within the viewModel).
+class FloatingBubbleService(
+): ExpandableBubbleService() {
+    private lateinit var floatingBubbleViewModel: FloatingBubbleViewModel
     override fun onCreate() {
         super.onCreate()
         val clipboardManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+        floatingBubbleViewModel = FloatingBubbleViewModel(application)  // TODO: having the viewModel instantiated here, because I wanted to access the System clipboard service, to get the copied text (I couldn't access the CLIPBOARD_SERVICE from within the viewModel).
         clipboardManager.addPrimaryClipChangedListener {
             val copiedString = clipboardManager.primaryClip?.getItemAt(0)?.text.toString()
             floatingBubbleViewModel.srcWord = TextFieldValue(

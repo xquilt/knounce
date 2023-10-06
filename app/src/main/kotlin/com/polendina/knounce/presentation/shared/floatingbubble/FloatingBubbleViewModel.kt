@@ -6,16 +6,19 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.polendina.knounce.PronunciationPlayer
+import com.polendina.knounce.data.database.WordDatabase
+import com.polendina.knounce.data.database.WordDb
 import com.polendina.knounce.domain.model.Item
+import com.polendina.knounce.domain.model.Pronunciations
 import com.polendina.knounce.domain.model.UserLanguages
+import com.polendina.knounce.domain.model.Word
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.bush.translator.Language
 import me.bush.translator.Translator
@@ -24,18 +27,8 @@ import trancore.corelib.pronunciation.retrofitInstance
 import java.io.IOException
 import java.net.SocketTimeoutException
 
-class Word(
-    title: String = "",
-    translation: String = "",
-    pronunciations: List<Pair<String, String>> = listOf()
-) {
-    var title by mutableStateOf(title)
-    var translation by mutableStateOf(translation)
-    var pronunciations: SnapshotStateList<Pair<String, String>> = pronunciations.toMutableStateList()
-}
-
 class FloatingBubbleViewModel(
-    private val application: Application = Application(),
+    private val application: Application,
 //    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 //    private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : AndroidViewModel(application) {
@@ -62,9 +55,7 @@ class FloatingBubbleViewModel(
      * @param word The word to be searched for.
      */
     // FIXME: I guess it should be called after expanded, because it's somewhat blocking of some kind. IDK
-    fun searchWord(
-        word: String
-    ) {
+    fun searchWord(word: String) {
         // Instantly add a Word synchronously, to avoid unnecessary null checks and race conditions with translation & pronunciations network requests.
         val insertIndex = if (words.size == 0) 0 else pageIndex + 1
         words.find { it.title == word }.let {
@@ -111,22 +102,13 @@ class FloatingBubbleViewModel(
      * Grab the appropriate direct audio file URL.
      *
      * @param searchTerm The word to be pronounced.
+     * @return Pronunciations object of the searched word.
      */
-    suspend fun grabAudioFiles(
-        searchTerm: String
-    ): List<Pair<String, String>> = retrofitInstance.wordPronunciations(
-            word = searchTerm.refine(),
-            interfaceLanguageCode = UserLanguages.ENGLISH.code,
-            languageCode = FORVO_LANGUAGE.GERMAN.code
-        ).awaitResponse().run {
-            body()?.data?.firstOrNull()?.items?.map {item ->
-                item.original to
-                Gson().fromJson(
-                    item.standard_pronunciation,
-                    Item.StandardPronunciation::class.java
-                ).realmp3
-            } ?: emptyList()
-        }
+    suspend fun grabAudioFiles(searchTerm: String) = retrofitInstance.wordPronunciations(
+        word = searchTerm.refine(),
+        interfaceLanguageCode = UserLanguages.ENGLISH.code,
+        languageCode = FORVO_LANGUAGE.GERMAN.code
+    ).awaitResponse().body()
 
     /**
      * If the word pronunciations aren't already loaded, then simply retrieve and append them.
@@ -134,7 +116,7 @@ class FloatingBubbleViewModel(
      * @param searchTerm The desired word to be pronounced.
      */
     fun loadPronunciations(searchTerm: String) = viewModelScope.launch {
-        currentWord.pronunciations.addAll(grabAudioFiles(searchTerm = searchTerm).toMutableStateList())
+        currentWord.pronunciations = grabAudioFiles(searchTerm = searchTerm)
     }
 
     /**
@@ -142,12 +124,11 @@ class FloatingBubbleViewModel(
      *
      * @param searchTerm: The word to play its pronunciation.
     */
-    fun playAudio(
-        searchTerm: String
-    ) {
+    fun playAudio(searchTerm: String) {
         currentWord
             .pronunciations
-            .find { it.first == searchTerm }
+            ?.parseAudios()
+            ?.find { it.first == searchTerm }
             ?.let {
                 viewModelScope.launch {
                     PronunciationPlayer.playRemoteAudio(it.second)
@@ -155,9 +136,37 @@ class FloatingBubbleViewModel(
             }
     }
 
+    private val database by lazy { WordDatabase.getDatabase(application) }
+    private val wordDao = database.wordDao
+
+    fun getWordsFromDb() = viewModelScope.launch {
+        words.addAll(wordDao.getWords().first().map {
+            Word(
+                title = it.title,
+                translation = it.translation,
+                pronunciations = it.pronunciations,
+                id = it.id
+            )
+        })
+    }
+
+    fun saveWordsToDb(word: Word) = viewModelScope.launch {
+        wordDao.insertWord(WordDb(
+            title = word.title,
+            translation = word.translation,
+            pronunciations = word.pronunciations,
+            id = word.id
+        )
+        )
+    }
+
     override fun onCleared() {
         super.onCleared()
         viewModelScope.cancel()
+    }
+
+    init {
+        getWordsFromDb()
     }
 
 }
@@ -177,3 +186,15 @@ fun String.wordByCharIndex(index: Int): String {
     if (index !in 0..this.length || this.getOrNull(index)?.isWhitespace() ?: false) return ""
     return(this.split(" ")[this.substring(0, index).count { it == ' ' }])
 }
+
+/**
+ *
+ * @return A List of string pairs representing the
+ */
+fun Pronunciations.parseAudios() = this.data.firstOrNull()?.items?.map { item ->
+    item.original to
+    Gson().fromJson(
+        item.standard_pronunciation,
+        Item.StandardPronunciation::class.java
+    ).realmp3
+} ?: emptyList()
