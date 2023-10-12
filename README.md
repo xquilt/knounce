@@ -17,11 +17,7 @@ The app is designed to be user-friendly and intuitive, making it easy for anyone
 
 ## Showcase
 <span>
-    <img src="./media/pronounce.png" width="300" height="600"> &nbsp; 
-    <img src="./media/certainLanguage.png" width="300" height="600"> &nbsp; 
-    <img src="./media/connectivity.png" width="300" height="600"> &nbsp; 
-    <img src="./media/expandedBubble.png" width="300" height="600"> &nbsp; 
-    <img src="./media/searchBubble.png" width="300" height="600"> &nbsp; 
+    <img src="./media/Knounce.jpg"> &nbsp; 
 </span>
 
 ## Install
