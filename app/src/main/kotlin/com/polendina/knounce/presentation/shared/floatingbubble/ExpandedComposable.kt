@@ -103,7 +103,7 @@ fun ExpandedCompose(
                         copyTargetLanguage = {},
                         playTargetLanguage = {},
                         // TODO: Have a loading effects for pronunciations chips & translation, till it's retrieved!
-                        audios = floatingBubbleViewModel.currentWord.pronunciations?.foo() ?: emptyList(),
+                        audios = floatingBubbleViewModel.currentWord.pronunciations?.parseAudios() ?: emptyList(),
                         audioClicked = {
                             PronunciationPlayer.playRemoteAudio(it.second)
                         },

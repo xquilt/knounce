@@ -20,8 +20,7 @@ data class Pronunciations(
         val translation: String,
         val subtotal: Int,
         val items: List<Item>,
-    ) {
-    }
+    )
 }
 data class Item(
     val id: Int,
