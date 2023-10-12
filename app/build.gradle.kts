@@ -2,6 +2,7 @@
 plugins {
     alias(libs.plugins.com.android.application)
     alias(libs.plugins.org.jetbrains.kotlin.android)
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -96,6 +97,15 @@ dependencies {
 //    androidTestImplementation(libs.ui.test.junit4)
     testImplementation("org.robolectric:robolectric:4.10.3")
     testImplementation("org.mockito:mockito-core:5.6.0")
+
+    // Room database
+    version = "2.5.2"
+    implementation("androidx.room:room-ktx:$version")
+    ksp("androidx.room:room-compiler:$version")
+    implementation("androidx.room:room-ktx:$version")
+
+    implementation("androidx.fragment:fragment-ktx:1.6.1")
+
 }
 
 tasks.withType<Test> {
