@@ -57,6 +57,7 @@ class FloatingBubbleViewModel(
     // FIXME: I guess it should be called after expanded, because it's somewhat blocking of some kind. IDK
     fun searchWord(word: String) {
         // Instantly add a Word synchronously, to avoid unnecessary null checks and race conditions with translation & pronunciations network requests.
+        if (word.isBlank()) return
         val insertIndex = if (words.size == 0) 0 else pageIndex + 1
         words.find { it.title == word }.let {
             if (it == null) {
@@ -64,7 +65,7 @@ class FloatingBubbleViewModel(
                 pageIndex = insertIndex
                 currentWord = words[insertIndex]
                 expanded = true
-                currentWord.title?.let {
+                currentWord.title.let {
                     try {
                         translateWord(word = it)
                         loadPronunciations(searchTerm = it)
@@ -73,10 +74,11 @@ class FloatingBubbleViewModel(
                     } catch (_: IOException) {}
                 }
             } else {
+                // Maintain whichever the current page/word as the previous page when navigating between various indices.
+                if (pageIndex != words.indexOf(it)) words.swap(pageIndex + 1, words.indexOf(it))
                 currentWord = it
                 pageIndex = words.indexOf(it)
                 expanded = true
-                return
             }
         }
     }
@@ -124,31 +126,27 @@ class FloatingBubbleViewModel(
      *
      * @param searchTerm: The word to play its pronunciation.
     */
-    fun playAudio(searchTerm: String) {
-        currentWord
-            .pronunciations
-            ?.parseAudios()
-            ?.find { it.first == searchTerm }
-            ?.let {
-                viewModelScope.launch {
-                    PronunciationPlayer.playRemoteAudio(it.second)
-                }
+    fun playAudio(searchTerm: String) = currentWord
+        .pronunciations
+        ?.parseAudios()
+        ?.find { it.first == searchTerm }
+        ?.let {
+            viewModelScope.launch {
+                PronunciationPlayer.playRemoteAudio(it.second)
             }
-    }
+        }
 
     private val database by lazy { WordDatabase.getDatabase(application) }
     private val wordDao = database.wordDao
 
-    fun getWordsFromDb() = viewModelScope.launch {
-        words.addAll(wordDao.getWords().first().map {
-            Word(
-                title = it.title,
-                translation = it.translation,
-                pronunciations = it.pronunciations,
-                id = it.id
-            )
-        })
-    }
+    private suspend fun getWordsFromDb() = words.addAll(wordDao.getWords().first().map {
+        Word(
+            title = it.title,
+            translation = it.translation,
+            pronunciations = it.pronunciations,
+            id = it.id
+        )
+    })
 
     fun saveWordsToDb(word: Word) = viewModelScope.launch {
         wordDao.insertWord(WordDb(
@@ -166,7 +164,9 @@ class FloatingBubbleViewModel(
     }
 
     init {
-        getWordsFromDb()
+        viewModelScope.launch {
+            getWordsFromDb()
+        }
     }
 
 }
@@ -198,3 +198,19 @@ fun Pronunciations.parseAudios() = this.data.firstOrNull()?.items?.map { item ->
         Item.StandardPronunciation::class.java
     ).realmp3
 } ?: emptyList()
+
+/**
+ * Swap two elements at a mutable list.
+ * If the initial destination is out of bounds, then simply remove & append the other element.
+ *
+ * @param first index of the initial destination.
+ * @param second index of the latter destination.
+ */
+fun <T> MutableList<T>.swap(first: Int, second: Int) {
+    if (first >= this.size) {
+        this.add(this[second]); this.remove(this[second])
+    } else {
+        this[first] = this[second].also { this[second] = this[first] }
+    }
+}
+

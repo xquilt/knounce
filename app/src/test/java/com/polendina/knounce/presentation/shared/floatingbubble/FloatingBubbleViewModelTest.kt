@@ -116,4 +116,16 @@ class FloatingBubbleViewModelTest {
         }
         println(floatingBubbleViewModel.words.toList())
     }
+
+    @Test
+    fun searchWordTest() = runTest {
+        germanWords.map { it.title }.forEach {
+            floatingBubbleViewModel.searchWord(it)
+        }
+        assertEquals(
+            germanWords.map { it.title }.filter { it.isNotBlank() }.distinct(),
+            floatingBubbleViewModel.words.toList().map { it.title }
+        )
+    }
+
 }
