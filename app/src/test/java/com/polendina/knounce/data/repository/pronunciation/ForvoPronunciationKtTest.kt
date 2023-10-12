@@ -1,5 +1,6 @@
 package com.polendina.knounce.data.repository.pronunciation
 
+import android.app.Application
 import com.polendina.knounce.domain.model.UserLanguages
 import com.polendina.knounce.presentation.shared.floatingbubble.FloatingBubbleViewModel
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +14,7 @@ import me.bush.translator.Translator
 import org.junit.jupiter.api.BeforeEach
 
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import trancore.corelib.pronunciation.retrofitInstance
 
 private val words = listOf(
@@ -26,6 +28,8 @@ private val words = listOf(
 )
 
 class ForvoPronunciationKtTest {
+
+    private val application = Mockito.mock(Application::class.java)
 
     @Test
     fun addTwo() {
@@ -76,7 +80,7 @@ class ForvoPronunciationKtTest {
             words.map { it.first } .map { it.replace("\n", "") }.forEach {word ->
                 println(word)
                 listOf(false, true, true, true, true, true).forEach { choice ->
-                    println(FloatingBubbleViewModel().grabAudioFiles(
+                    println(FloatingBubbleViewModel(application).grabAudioFiles(
                         searchTerm = word
                     ))
                 }
@@ -89,11 +93,12 @@ class ForvoPronunciationKtTest {
 class GoogleTranslationTest {
 
     private lateinit var floatingBubbleViewModel: FloatingBubbleViewModel
+    private val application = Mockito.mock(Application::class.java)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @BeforeEach
     fun setup() {
-        floatingBubbleViewModel = FloatingBubbleViewModel()
+        floatingBubbleViewModel = FloatingBubbleViewModel(application)
         Dispatchers.setMain(UnconfinedTestDispatcher())
     }
 
