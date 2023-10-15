@@ -22,13 +22,15 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.LayersClear
 import androidx.compose.material.icons.filled.PlayCircleOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -37,6 +39,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,7 +49,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.polendina.knounce.domain.model.Word
 import com.polendina.knounce.ui.theme.SearchFieldFontStyle
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -123,12 +129,13 @@ fun MediaControlsRow(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ExpandedBubbleBody(
+    word: Word,
     onSrcCardClick: () -> Unit,
     onSrcCardWordClick: (String) -> Unit,
     srcWordDisplay: String,
     targetWordDisplay: String,
-    history: (String) -> Unit,
     onExpandedCardSwipe: (Int) -> Unit,
+    addWordCallback: (String) -> Unit,
     playSrcLanguage: (String) -> Unit,
     copyTargetLanguage: (String) -> Unit,
     playTargetLanguage: (String) -> Unit,
@@ -140,9 +147,9 @@ fun ExpandedBubbleBody(
     Column {
         MediaControlsRow(
             text = srcWordDisplay,
-            copyTextCallback = history,
+            copyTextCallback = addWordCallback,
             playAudioCallback = playSrcLanguage,
-            firstImageVector = Icons.Default.LayersClear, // TODO: Probably it's better to have some long-press functionality on the src word display portion, that preview a deletion prompt of some kind.
+            firstImageVector = if (word.loaded) Icons.Default.CheckCircle else Icons.Default.AddCircle, // TODO: Probably it's better to have some long-press functionality on the src word display portion, that preview a deletion prompt of some kind.
             secondImageVector = Icons.Default.PlayCircleOutline,
             color = MaterialTheme.colorScheme.onBackground
         )
@@ -221,4 +228,28 @@ fun ExpandedBubbleBody(
                 )
         )
     }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Preview(showBackground = true)
+@Composable
+fun ExpandedBubbleBodyPreview() {
+    val word by remember { mutableStateOf(Word()) }
+    ExpandedBubbleBody(
+        word = word,
+        onSrcCardClick = { /*TODO*/ },
+        onSrcCardWordClick = {},
+        srcWordDisplay = "",
+        targetWordDisplay = "",
+        onExpandedCardSwipe = {},
+        addWordCallback = {
+            word.loaded = !word.loaded
+        },
+        playSrcLanguage = {},
+        copyTargetLanguage = {},
+        playTargetLanguage = {},
+        audios = emptyList(),
+        audioClicked = {},
+        horizontalPagerState = rememberPagerState { 1 }
+    )
 }

@@ -80,6 +80,7 @@ fun ExpandedCompose(
                 AnimatedVisibility(visible = floatingBubbleViewModel.expanded) {
                     val horizontalPagerState = rememberPagerState(initialPage = floatingBubbleViewModel.pageIndex) { if (floatingBubbleViewModel.words.isEmpty()) 1 else floatingBubbleViewModel.words.size }
                     ExpandedBubbleBody(
+                        word = floatingBubbleViewModel.currentWord,
                         srcWordDisplay = floatingBubbleViewModel.currentWord.title,
                         targetWordDisplay = floatingBubbleViewModel.currentWord.translation,
                         onSrcCardClick = {
@@ -92,8 +93,11 @@ fun ExpandedCompose(
                                 horizontalPagerState.animateScrollToPage(floatingBubbleViewModel.pageIndex)
                             }
                         },
-                        history = {
-                            floatingBubbleViewModel.saveWordsToDb(floatingBubbleViewModel.currentWord)
+                        addWordCallback = {
+                            floatingBubbleViewModel.currentWord.let {
+                                if (it.loaded) floatingBubbleViewModel.removeWordFromDb(it) else floatingBubbleViewModel.insertWordToDb(it)
+                                it.loaded = !it.loaded
+                            }
                         },
                         playSrcLanguage = {
                             floatingBubbleViewModel.playAudio(

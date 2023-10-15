@@ -105,7 +105,7 @@ fun HistoryItemsPreview(
                         ) }
                     ))
                 ),
-                id = 0
+                loaded = true
             )
         }
     HistoryItems(

@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.polendina.knounce.PronunciationPlayer
 import com.polendina.knounce.data.database.WordDatabase
@@ -17,8 +16,10 @@ import com.polendina.knounce.domain.model.Item
 import com.polendina.knounce.domain.model.Pronunciations
 import com.polendina.knounce.domain.model.UserLanguages
 import com.polendina.knounce.domain.model.Word
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.bush.translator.Language
 import me.bush.translator.Translator
@@ -29,11 +30,13 @@ import java.net.SocketTimeoutException
 
 class FloatingBubbleViewModel(
     private val application: Application,
+    private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Main,
 //    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 //    private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : AndroidViewModel(application) {
     var srcWord by mutableStateOf(TextFieldValue(""))
     var targetWordDisplay by mutableStateOf("")
+    val viewModelScope = CoroutineScope(coroutineDispatcher)
 
     //    var srcWord by mutableStateOf(TextFieldValue(text = loremIpsum))
 //    var srcWordDisplay by mutableStateOf(loremIpsum)
@@ -139,23 +142,36 @@ class FloatingBubbleViewModel(
     private val database by lazy { WordDatabase.getDatabase(application) }
     private val wordDao = database.wordDao
 
-    private suspend fun getWordsFromDb() = words.addAll(wordDao.getWords().first().map {
+    /**
+     * load words from the local Room database.
+     *
+     * @return Return a List of Words.
+     */
+    suspend fun loadWordsFromDb(): List<Word> = wordDao.getWords().map {
         Word(
             title = it.title,
             translation = it.translation,
             pronunciations = it.pronunciations,
-            id = it.id
+            loaded = it.loaded
         )
-    })
+    }
 
-    fun saveWordsToDb(word: Word) = viewModelScope.launch {
+    fun insertWordToDb(word: Word) = viewModelScope.launch {
         wordDao.insertWord(WordDb(
             title = word.title,
             translation = word.translation,
             pronunciations = word.pronunciations,
-            id = word.id
-        )
-        )
+            loaded = true
+        ))
+    }
+
+    /**
+     * Remove a word from the database, but not from the current viewModel list.
+     *
+     * @param word The Word to be delete. Obtained frht moe current viewmodel.
+     */
+    fun removeWordFromDb(word: Word) = viewModelScope.launch {
+        wordDao.deleteWord(word.title)
     }
 
     override fun onCleared() {
@@ -165,7 +181,7 @@ class FloatingBubbleViewModel(
 
     init {
         viewModelScope.launch {
-            getWordsFromDb()
+            words.addAll(loadWordsFromDb())
         }
     }
 
@@ -182,6 +198,13 @@ const val LOREM_IPSUM = "Lorem Ipsum is simply dummy text of the printing and ty
 
 // TODO: It should exclude other characters e.g., emojis, etc.
 fun String.refine() = this.replace("\n", "")
+
+/**
+ * Find a certain word based off the index of a character
+ *
+ * @param index The index of the character to be found.
+ * @return The word encompassing the character at the specified index.
+ */
 fun String.wordByCharIndex(index: Int): String {
     if (index !in 0..this.length || this.getOrNull(index)?.isWhitespace() ?: false) return ""
     return(this.split(" ")[this.substring(0, index).count { it == ' ' }])
@@ -213,4 +236,3 @@ fun <T> MutableList<T>.swap(first: Int, second: Int) {
         this[first] = this[second].also { this[second] = this[first] }
     }
 }
-

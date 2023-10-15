@@ -1,15 +1,17 @@
 package com.polendina.knounce.data.database
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
+@AutoMigration(from = 1, to = 2)
 @TypeConverters(Converters::class)
 @Database(
     entities = [WordDb::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class WordDatabase: RoomDatabase() {
@@ -25,7 +27,7 @@ abstract class WordDatabase: RoomDatabase() {
                     klass = WordDatabase::class.java,
                     name = "words"
                 )
-                    .build()
+                .build()
                 INSTANCE = instance
                 instance
             }

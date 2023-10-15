@@ -8,9 +8,10 @@ class Word(
     title: String = "",
     translation: String = "",
     pronunciations: Pronunciations? = null,
-    val id: Int = 0
+    loaded: Boolean = false
 ) {
     var title by mutableStateOf(title)
     var translation by mutableStateOf(translation)
     var pronunciations by mutableStateOf(pronunciations)
+    var loaded by mutableStateOf(loaded)
 }
