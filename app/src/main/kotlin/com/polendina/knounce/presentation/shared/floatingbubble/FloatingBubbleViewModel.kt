@@ -16,6 +16,8 @@ import com.polendina.knounce.domain.model.Item
 import com.polendina.knounce.domain.model.Pronunciations
 import com.polendina.knounce.domain.model.UserLanguages
 import com.polendina.knounce.domain.model.Word
+import com.polendina.knounce.utils.refine
+import com.polendina.knounce.utils.swap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -196,20 +198,6 @@ enum class FORVO_LANGUAGE(
 }
 const val LOREM_IPSUM = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
 
-// TODO: It should exclude other characters e.g., emojis, etc.
-fun String.refine() = this.replace("\n", "")
-
-/**
- * Find a certain word based off the index of a character
- *
- * @param index The index of the character to be found.
- * @return The word encompassing the character at the specified index.
- */
-fun String.wordByCharIndex(index: Int): String {
-    if (index !in 0..this.length || this.getOrNull(index)?.isWhitespace() ?: false) return ""
-    return(this.split(" ")[this.substring(0, index).count { it == ' ' }])
-}
-
 /**
  *
  * @return A List of string pairs representing the
@@ -221,18 +209,3 @@ fun Pronunciations.parseAudios() = this.data.firstOrNull()?.items?.map { item ->
         Item.StandardPronunciation::class.java
     ).realmp3
 } ?: emptyList()
-
-/**
- * Swap two elements at a mutable list.
- * If the initial destination is out of bounds, then simply remove & append the other element.
- *
- * @param first index of the initial destination.
- * @param second index of the latter destination.
- */
-fun <T> MutableList<T>.swap(first: Int, second: Int) {
-    if (first >= this.size) {
-        this.add(this[second]); this.remove(this[second])
-    } else {
-        this[first] = this[second].also { this[second] = this[first] }
-    }
-}
