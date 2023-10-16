@@ -3,21 +3,26 @@ package com.polendina.knounce.presentation.shared.floatingbubble
 import android.app.Application
 import androidx.compose.ui.text.input.TextFieldValue
 import com.polendina.knounce.domain.model.Word
+import com.polendina.knounce.utils.refine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 
-import org.junit.jupiter.api.Test
-import org.mockito.Mockito
-
+//@RunWith(MockitoJUnitRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class FloatingBubbleViewModelTest {
 
-    private val application = Mockito.mock(Application::class.java)
     private lateinit var floatingBubbleViewModel: FloatingBubbleViewModel
+    private lateinit var application: Application
     private var germanWords = listOf(
         Word(
             title = "nacht",
@@ -68,10 +73,13 @@ class FloatingBubbleViewModelTest {
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    @BeforeEach
+    @Before
     fun setup() {
-        floatingBubbleViewModel = FloatingBubbleViewModel(application)
-        Dispatchers.setMain(StandardTestDispatcher())
+        val testDispatcher = UnconfinedTestDispatcher()
+        Dispatchers.setMain(testDispatcher)
+//        application = Mockito.mock(Application::class.java)
+        application = RuntimeEnvironment.getApplication()
+        floatingBubbleViewModel = FloatingBubbleViewModel(application, testDispatcher)
     }
 
     @Test
@@ -126,6 +134,18 @@ class FloatingBubbleViewModelTest {
             germanWords.map { it.title }.filter { it.isNotBlank() }.distinct(),
             floatingBubbleViewModel.words.toList().map { it.title }
         )
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun loadWordsFromDbTest() = runTest {
+        germanWords.forEach {
+            floatingBubbleViewModel.searchWord(it.title)
+            println(floatingBubbleViewModel.currentWord.title)
+            floatingBubbleViewModel.insertWordToDb(floatingBubbleViewModel.currentWord)
+        }
+        advanceUntilIdle()
+        println(floatingBubbleViewModel.loadWordsFromDb().map { it.title })
     }
 
 }
