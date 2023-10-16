@@ -53,6 +53,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.polendina.knounce.domain.model.Word
 import com.polendina.knounce.ui.theme.SearchFieldFontStyle
+import com.polendina.knounce.utils.wordByCharIndex
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

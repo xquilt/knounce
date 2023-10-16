@@ -6,8 +6,10 @@ import android.content.Intent
 import android.os.IBinder
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import com.polendina.knounce.R
 import com.torrydo.floatingbubbleview.CloseBubbleBehavior
 import com.torrydo.floatingbubbleview.FloatingBubbleListener
+import com.torrydo.floatingbubbleview.helper.ViewHelper
 import com.torrydo.floatingbubbleview.service.expandable.BubbleBuilder
 import com.torrydo.floatingbubbleview.service.expandable.ExpandableBubbleService
 import com.torrydo.floatingbubbleview.service.expandable.ExpandedBubbleBuilder
@@ -37,11 +39,12 @@ class FloatingBubbleService(
                 )
             }
             .bubbleStyle(null)
-            .startLocation(100, 100)
-            .startLocationPx(100, 100)
+            .startLocation(0, 600)
+            .startLocationPx(0, 600)
             .enableAnimateToEdge(true)
-            .closeBehavior(CloseBubbleBehavior.DYNAMIC_CLOSE_BUBBLE)
+            .closeBubbleView(ViewHelper.fromDrawable(this, R.drawable.ic_close_icon, 60, 60))
             .closeBubbleStyle(null)
+            .closeBehavior(CloseBubbleBehavior.FIXED_CLOSE_BUBBLE)
             .distanceToClose(100)
             .bottomBackground(false)
             .forceDragging(true)
