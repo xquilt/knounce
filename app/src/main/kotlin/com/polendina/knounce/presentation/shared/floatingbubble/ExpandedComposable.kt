@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -111,16 +112,18 @@ fun ExpandedCompose(
                         audioClicked = {
                             PronunciationPlayer.playRemoteAudio(it.second)
                         },
-                        onExpandedCardSwipe = {
-                            floatingBubbleViewModel.pageIndex = horizontalPagerState.currentPage
+                        horizontalPagerState = horizontalPagerState
+                    )
+                    LaunchedEffect(horizontalPagerState) {
+                        snapshotFlow{horizontalPagerState.currentPage}.collect { page ->
+                            floatingBubbleViewModel.pageIndex = page
                             floatingBubbleViewModel.currentWord = floatingBubbleViewModel.words.getOrNull(floatingBubbleViewModel.pageIndex) ?: Word()
                             floatingBubbleViewModel.srcWord = TextFieldValue(
                                 text = floatingBubbleViewModel.currentWord.title,
                                 selection = TextRange(floatingBubbleViewModel.currentWord.title.length)
                             )
-                        },
-                        horizontalPagerState = horizontalPagerState
-                    )
+                        }
+                    }
                 }
                 AnimatedVisibility(visible = !floatingBubbleViewModel.expanded) {
                     SearchWordExpandedComposable(

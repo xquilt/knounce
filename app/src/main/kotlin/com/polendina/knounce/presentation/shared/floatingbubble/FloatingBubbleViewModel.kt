@@ -70,14 +70,12 @@ class FloatingBubbleViewModel(
                 pageIndex = insertIndex
                 currentWord = words[insertIndex]
                 expanded = true
-                currentWord.title.let {
-                    try {
-                        translateWord(word = it)
-                        loadPronunciations(searchTerm = it)
-                    } catch (e: SocketTimeoutException) {
-                        e.printStackTrace(); println(e.cause)
-                    } catch (_: IOException) {}
-                }
+                try {
+                    translateWord(word = currentWord.title)
+                    loadPronunciations(searchTerm = currentWord.title)
+                } catch (e: SocketTimeoutException) {
+                    e.printStackTrace(); println(e.cause)
+                } catch (_: IOException) {}
             } else {
                 // Maintain whichever the current page/word as the previous page when navigating between various indices.
                 if (pageIndex != words.indexOf(it)) words.swap(pageIndex + 1, words.indexOf(it))

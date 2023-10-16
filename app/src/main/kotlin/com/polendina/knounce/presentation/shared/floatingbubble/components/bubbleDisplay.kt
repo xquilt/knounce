@@ -47,7 +47,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -135,7 +134,6 @@ fun ExpandedBubbleBody(
     onSrcCardWordClick: (String) -> Unit,
     srcWordDisplay: String,
     targetWordDisplay: String,
-    onExpandedCardSwipe: (Int) -> Unit,
     addWordCallback: (String) -> Unit,
     playSrcLanguage: (String) -> Unit,
     copyTargetLanguage: (String) -> Unit,
@@ -165,9 +163,6 @@ fun ExpandedBubbleBody(
                         weight = 1f,
                         fill = false
                     )
-                    .onPlaced { focusState ->
-                        onExpandedCardSwipe(it)
-                    }
             )
         }
         LazyRow(
@@ -242,7 +237,6 @@ fun ExpandedBubbleBodyPreview() {
         onSrcCardWordClick = {},
         srcWordDisplay = "",
         targetWordDisplay = "",
-        onExpandedCardSwipe = {},
         addWordCallback = {
             word.loaded = !word.loaded
         },
