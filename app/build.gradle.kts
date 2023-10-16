@@ -49,6 +49,10 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
 }
 
 dependencies {
@@ -97,6 +101,8 @@ dependencies {
 //    androidTestImplementation(libs.ui.test.junit4)
     testImplementation("org.robolectric:robolectric:4.10.3")
     testImplementation("org.mockito:mockito-core:5.6.0")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    testImplementation("org.robolectric:robolectric:4.10.3")
 
     // Room database
     version = "2.5.2"
@@ -105,6 +111,12 @@ dependencies {
     implementation("androidx.room:room-ktx:$version")
 
     implementation("androidx.fragment:fragment-ktx:1.6.1")
+
+    // Coroutines Testing
+    androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("androidx.test:rules:1.5.0")
 
 }
 
