@@ -15,4 +15,6 @@
     <string name="close">Close</string>
     <string name="new_translation">New translation</string>
     <string name="enter_text">Enter text</string>
+    <string name="notification_title">"Tap To Translate" is activated</string>
+    <string name="notification_text">Tap on notification in order to open the popup</string>
 </resources>

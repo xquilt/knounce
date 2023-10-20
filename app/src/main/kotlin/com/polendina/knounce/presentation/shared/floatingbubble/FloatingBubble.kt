@@ -6,9 +6,11 @@ import android.content.Intent
 import android.os.IBinder
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.core.app.NotificationCompat
 import com.polendina.knounce.R
 import com.torrydo.floatingbubbleview.CloseBubbleBehavior
 import com.torrydo.floatingbubbleview.FloatingBubbleListener
+import com.torrydo.floatingbubbleview.helper.NotificationHelper
 import com.torrydo.floatingbubbleview.helper.ViewHelper
 import com.torrydo.floatingbubbleview.service.expandable.BubbleBuilder
 import com.torrydo.floatingbubbleview.service.expandable.ExpandableBubbleService
@@ -76,6 +78,29 @@ class FloatingBubbleService(
             .fillMaxWidth(true)
             .enableAnimateToEdge(true)
             .dimAmount(0.4f)
+    }
+    override fun startNotificationForeground() {
+        val appName = getString(R.string.app_name)
+        NotificationHelper(this, appName).apply {
+            createNotificationChannel()
+        }.let {
+            startForeground(
+                it.notificationId,
+                NotificationCompat.Builder(this, appName)
+                    .setOngoing(true)
+                    .setSmallIcon(R.drawable.ic_launcher_foreground)
+                    .setContentTitle(getString(R.string.notification_title))
+                    .setContentText(getString(R.string.notification_text))
+                    .setPriority(NotificationCompat.PRIORITY_MIN)
+                    .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                    .setSilent(true)
+                    .build()
+            )
+        }
+    }
+
+    override fun onDestroy() {
+        super.removeAll()
     }
 }
 
