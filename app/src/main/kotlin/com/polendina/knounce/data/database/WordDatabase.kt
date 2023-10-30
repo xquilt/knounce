@@ -10,7 +10,7 @@ import androidx.room.TypeConverters
 @AutoMigration(from = 1, to = 2)
 @TypeConverters(Converters::class)
 @Database(
-    entities = [WordDb::class],
+    entities = [Word::class],
     version = 2,
     exportSchema = false
 )

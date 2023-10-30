@@ -7,9 +7,9 @@ import androidx.room.Query
 @Dao
 interface WordDao {
     @Insert
-    suspend fun insertWord(word: WordDb)
-    @Query("DELETE FROM worddb WHERE worddb.title = :word")
+    suspend fun insertWord(word: Word)
+    @Query("DELETE FROM word WHERE word.title = :word")
     suspend fun deleteWord(word: String)
-    @Query("SELECT * FROM worddb")
-    suspend fun getWords(): List<WordDb>
+    @Query("SELECT * FROM word")
+    suspend fun getWords(): List<Word>
 }
