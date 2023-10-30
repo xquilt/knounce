@@ -1,6 +1,7 @@
 package com.polendina.knounce.data.repository.pronunciation
 
 import android.app.Application
+import com.polendina.knounce.data.database.Word
 import com.polendina.knounce.domain.model.UserLanguages
 import com.polendina.knounce.presentation.shared.floatingbubble.FloatingBubbleViewModel
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +16,7 @@ import org.junit.jupiter.api.BeforeEach
 
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import trancore.corelib.pronunciation.retrofitInstance
+import trancore.corelib.pronunciation.retrofit
 
 private val words = listOf(
     Pair("einem", "one"),
@@ -32,11 +33,6 @@ class ForvoPronunciationKtTest {
     private val application = Mockito.mock(Application::class.java)
 
     @Test
-    fun addTwo() {
-        assert(addTwo(1, 2).equals(3))
-    }
-
-    @Test
     fun getNotes() {
         ForvoPronunciation.wordPronunciationsAll(
             word = "game",
@@ -51,7 +47,7 @@ class ForvoPronunciationKtTest {
     @Test
     fun wordPronunciationsAll() {
         listOf("collaboration", "talk", "gaming", "game").forEach {
-            retrofitInstance.wordPronunciationsAll(it, UserLanguages.ENGLISH.code).execute().run {
+            retrofit.wordPronunciationsAll(it, UserLanguages.ENGLISH.code).execute().run {
                 println(body())
             }
         }
@@ -59,7 +55,7 @@ class ForvoPronunciationKtTest {
 
     @Test
     fun translatePronunciationsFromToMap() {
-        retrofitInstance.pronunciationTranslationMap(
+        retrofit.pronunciationTranslationMap(
             UserLanguages.ENGLISH.code
         ).execute().let {
             if (it.isSuccessful) {
@@ -105,7 +101,8 @@ class GoogleTranslationTest {
     @Test
     fun translateWordTest() = runTest {
         words.map {
-            floatingBubbleViewModel.translateWord(word = it.first).join()
+            floatingBubbleViewModel.currentWord = Word(it.first, null, null, false)
+            floatingBubbleViewModel.translateWord().join()
             assert(it.second == floatingBubbleViewModel.targetWordDisplay)
         }
     }

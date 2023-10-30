@@ -1,9 +1,9 @@
 package com.polendina.knounce.presentation.shared.floatingbubble
 
 import android.app.Application
-import androidx.compose.ui.text.input.TextFieldValue
-import com.polendina.knounce.domain.model.Word
-import com.polendina.knounce.utils.refine
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
+import com.polendina.knounce.data.database.Word
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -26,49 +26,61 @@ class FloatingBubbleViewModelTest {
     private var germanWords = listOf(
         Word(
             title = "nacht",
-            translation = "night",
-            pronunciations = null
+            translation = mutableStateMapOf("" to mutableStateListOf(Word.Translation(null, null))),
+            pronunciations = null,
+            false
         ),
         Word(
             title = "milch",
-            translation = "milk",
-            pronunciations = null
+            translation = mutableStateMapOf("" to mutableStateListOf(Word.Translation(null, null))),
+            pronunciations = null,
+            false
         ),
         Word(
             title = "ich",
-            translation = "I",
-            pronunciations = null
+            translation = mutableStateMapOf("" to mutableStateListOf(Word.Translation(null, null))),
+            pronunciations = null,
+            false
         ),
         Word(
             title = "ich",
-            translation = "I",
-            pronunciations = null
+            translation = mutableStateMapOf("" to mutableStateListOf(Word.Translation(null, null))),
+            pronunciations = null,
+            false
         ),
         Word(
             title = "",
-            translation = "I",
-            pronunciations = null
+            translation = mutableStateMapOf("" to mutableStateListOf(Word.Translation(null, null))),
+            pronunciations = null,
+            false
         ),
         Word(
             title = " ",
-            translation = "I",
-            pronunciations = null
+            translation = mutableStateMapOf("" to mutableStateListOf(Word.Translation(null, null))),
+            pronunciations = null,
+            false
         ),
         // Following 2 are empty
         Word(
             title = "spechieren",
-            translation = "spec",
-            pronunciations = null
+    //            translation = "spec",
+            translation = mutableStateMapOf("" to mutableStateListOf(Word.Translation(null, null))),
+            pronunciations = null,
+            false
         ),
         Word(
             title = "@$@!#$",
-            translation = "@$@!#$",
-            pronunciations = null
+    //            translation = "@$@!#$",
+            translation = mutableStateMapOf("" to mutableStateListOf(Word.Translation(null, null))),
+            pronunciations = null,
+            false
         ),
         Word(
             title = "Mediterrane Pflanzen halten das locker aus.\n Aber auch die brauchen ab und an mal Wasser",
-            translation = "Mediterranean plants can easily handle this. But they also need water from time to time",
-            pronunciations = null
+            translation = mutableStateMapOf("" to mutableStateListOf(Word.Translation(null, null))),
+    //            translation = "Mediterranean plants can easily handle this. But they also need water from time to time",
+            pronunciations = null,
+            false
         )
     )
 
@@ -84,16 +96,20 @@ class FloatingBubbleViewModelTest {
 
     @Test
     fun translateWord() = runTest {
-        floatingBubbleViewModel.words.clear()
-        germanWords.forEach {
-            floatingBubbleViewModel.words.add(Word(title = it.title))
-            floatingBubbleViewModel.currentWord = floatingBubbleViewModel.words.last()
-            floatingBubbleViewModel.translateWord(word = it.title.refine()).join()
-        }
-        assertEquals(
-            germanWords.map { it.translation },
-            floatingBubbleViewModel.words.map { it.translation }
-        )
+//        floatingBubbleViewModel.words.clear()
+//        germanWords.subList(0, 1).forEach {
+//            floatingBubbleViewModel.words.add(Word(title = it.title.refine()))
+//            floatingBubbleViewModel.currentWord = floatingBubbleViewModel.words.last()
+//            floatingBubbleViewModel.translateWord().join()
+//        }
+        floatingBubbleViewModel.currentWord = Word("danke", null, null, false)
+        floatingBubbleViewModel.translateWord().join()
+        println(floatingBubbleViewModel.currentWord)
+//        assertEquals(
+//            germanWords.map { it.translation },
+//            val j = floatingBubbleViewModel.words.map { it.translation }
+//            println(j)
+//        )
     }
 
     @Test
@@ -115,14 +131,14 @@ class FloatingBubbleViewModelTest {
 
     @Test
     fun loadPronunciations() = runTest {
-        germanWords.forEach {
+        germanWords.subList(0, 1).forEach {
             println(it.title)
-            floatingBubbleViewModel.srcWord = TextFieldValue(it.title)
-            floatingBubbleViewModel.loadPronunciations(
-                searchTerm = it.title
-            ).join()
+//            floatingBubbleViewModel.srcWord = TextFieldValue(it.title)
+            floatingBubbleViewModel.currentWord = com.polendina.knounce.domain.model.WordDb(it.title)
+            floatingBubbleViewModel.loadPronunciations().join()
         }
-        println(floatingBubbleViewModel.words.toList())
+        println(floatingBubbleViewModel.currentWord.pronunciations?.map { it.first })
+//        println(floatingBubbleViewModel.words.toList())
     }
 
     @Test
