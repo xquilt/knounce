@@ -50,7 +50,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.polendina.knounce.domain.model.Word
+import com.polendina.knounce.data.database.Word
 import com.polendina.knounce.ui.theme.SearchFieldFontStyle
 import com.polendina.knounce.utils.wordByCharIndex
 
@@ -133,7 +133,7 @@ fun ExpandedBubbleBody(
     onSrcCardClick: () -> Unit,
     onSrcCardWordClick: (String) -> Unit,
     srcWordDisplay: String,
-    targetWordDisplay: String,
+    targetWordDisplay: MutableMap<String, MutableList<Word.Translation>>?,
     addWordCallback: (String) -> Unit,
     playSrcLanguage: (String) -> Unit,
     copyTargetLanguage: (String) -> Unit,
@@ -207,7 +207,7 @@ fun ExpandedBubbleBody(
             .background(Color.White)
             .height(1.dp))
         MediaControlsRow(
-            text = targetWordDisplay,
+            text = targetWordDisplay?.keys?.first() ?: "",
             copyTextCallback = copyTargetLanguage,
             playAudioCallback = playTargetLanguage,
             firstImageVector = Icons.Default.ContentCopy,
@@ -215,7 +215,7 @@ fun ExpandedBubbleBody(
             color = MaterialTheme.colorScheme.onPrimaryContainer,
         )
         DisplayCard(
-            text = targetWordDisplay,
+            text = targetWordDisplay?.values?.first()?.first()?.explanation ?: "",
             color = MaterialTheme.colorScheme.onPrimaryContainer,
             modifier = Modifier
                 .weight(
@@ -230,13 +230,13 @@ fun ExpandedBubbleBody(
 @Preview(showBackground = true)
 @Composable
 fun ExpandedBubbleBodyPreview() {
-    val word by remember { mutableStateOf(Word()) }
+    val word by remember { mutableStateOf(Word(title = "", translation = null, pronunciations = null, loaded = false)) }
     ExpandedBubbleBody(
         word = word,
         onSrcCardClick = { /*TODO*/ },
         onSrcCardWordClick = {},
         srcWordDisplay = "",
-        targetWordDisplay = "",
+        targetWordDisplay = word.translation,
         addWordCallback = {
             word.loaded = !word.loaded
         },

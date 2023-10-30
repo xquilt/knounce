@@ -101,4 +101,3 @@ fun BubbleDisplayFooter(
         BottomButton(text = stringResource(id = R.string.new_translation), onClick = newTranslation)
     }
 }
-

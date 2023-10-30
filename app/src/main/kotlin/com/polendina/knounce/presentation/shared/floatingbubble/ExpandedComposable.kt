@@ -31,7 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.polendina.knounce.PronunciationPlayer
-import com.polendina.knounce.domain.model.Word
+import com.polendina.knounce.data.database.Word
 import com.polendina.knounce.presentation.shared.floatingbubble.components.SearchWordExpandedComposable
 import kotlinx.coroutines.launch
 
@@ -96,8 +96,8 @@ fun ExpandedCompose(
                         },
                         addWordCallback = {
                             floatingBubbleViewModel.currentWord.let {
-                                if (it.loaded) floatingBubbleViewModel.removeWordFromDb(it) else floatingBubbleViewModel.insertWordToDb(it)
-                                it.loaded = !it.loaded
+                                if (it.loaded) floatingBubbleViewModel.removeWordFromDb(wordTitle = it.title) else floatingBubbleViewModel.insertWordToDb(it)
+                                floatingBubbleViewModel.invertLoaded()
                             }
                         },
                         playSrcLanguage = {
@@ -108,7 +108,7 @@ fun ExpandedCompose(
                         copyTargetLanguage = {},
                         playTargetLanguage = {},
                         // TODO: Have a loading effects for pronunciations chips & translation, till it's retrieved!
-                        audios = floatingBubbleViewModel.currentWord.pronunciations?.parseAudios() ?: emptyList(),
+                        audios = floatingBubbleViewModel.currentWord.pronunciations ?: emptyList(),
                         audioClicked = {
                             PronunciationPlayer.playRemoteAudio(it.second)
                         },
@@ -117,7 +117,7 @@ fun ExpandedCompose(
                     LaunchedEffect(horizontalPagerState) {
                         snapshotFlow{horizontalPagerState.currentPage}.collect { page ->
                             floatingBubbleViewModel.pageIndex = page
-                            floatingBubbleViewModel.currentWord = floatingBubbleViewModel.words.getOrNull(floatingBubbleViewModel.pageIndex) ?: Word()
+                            floatingBubbleViewModel.currentWord = floatingBubbleViewModel.words.getOrNull(floatingBubbleViewModel.pageIndex) ?: Word(title = "", translation = null, pronunciations = null, loaded = false)
                             floatingBubbleViewModel.srcWord = TextFieldValue(
                                 text = floatingBubbleViewModel.currentWord.title,
                                 selection = TextRange(floatingBubbleViewModel.currentWord.title.length)
@@ -170,6 +170,6 @@ fun ExpandedCompose(
 @Composable
 fun ExpandedComposePreview() {
     ExpandedCompose(
-        floatingBubbleViewModel = viewModel()
+        floatingBubbleViewModel = viewModel(),
     )
 }

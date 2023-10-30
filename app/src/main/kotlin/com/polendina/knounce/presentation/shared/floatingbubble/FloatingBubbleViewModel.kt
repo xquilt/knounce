@@ -4,43 +4,45 @@ import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.AndroidViewModel
 import com.google.gson.Gson
 import com.polendina.knounce.PronunciationPlayer
-import com.polendina.knounce.data.database.WordDatabase
-import com.polendina.knounce.data.database.WordDb
+import com.polendina.knounce.data.database.Database
+import com.polendina.knounce.data.database.Word
 import com.polendina.knounce.domain.model.Item
-import com.polendina.knounce.domain.model.Pronunciations
 import com.polendina.knounce.domain.model.UserLanguages
-import com.polendina.knounce.domain.model.Word
 import com.polendina.knounce.utils.refine
 import com.polendina.knounce.utils.swap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import me.bush.translator.Language
 import me.bush.translator.Translator
 import retrofit2.awaitResponse
-import trancore.corelib.pronunciation.retrofitInstance
+import trancore.corelib.pronunciation.retrofit
 import java.io.IOException
 import java.net.SocketTimeoutException
 
 class FloatingBubbleViewModel(
     private val application: Application,
-    private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Main,
+    coroutineDispatcher: CoroutineDispatcher = Dispatchers.Main,
+    val database: Database
 //    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 //    private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Main
-) : AndroidViewModel(application) {
+) : AndroidViewModel(application), Database {
     var srcWord by mutableStateOf(TextFieldValue(""))
     var targetWordDisplay by mutableStateOf("")
     val viewModelScope = CoroutineScope(coroutineDispatcher)
 
-    //    var srcWord by mutableStateOf(TextFieldValue(text = loremIpsum))
+//    var srcWord by mutableStateOf(TextFieldValue(text = loremIpsum))
 //    var srcWordDisplay by mutableStateOf(loremIpsum)
 //    var targetWordDisplay by mutableStateOf(loremIpsum)
     var expanded by mutableStateOf(true)
@@ -49,9 +51,18 @@ class FloatingBubbleViewModel(
 //    val clipboardManager = application.getSystemService(Service.CLIPBOARD_SERVICE) as ClipboardManager
 //    private val clipboardContent = clipboardManager.primaryClip?.getItemAt(0)?.text.toString()
     val words = mutableStateListOf<Word>()
-    var currentWord by mutableStateOf(Word())
-//    val words = mutableStateListOf(Word(title = "Einem", pronunciations = listOf(("einem" to ""), ("seit einema monat" to ""), ("einem" to ""), ("seit einem monat" to ""), ("seit einem monat" to ""))), Word(title = "Nacht"), Word("hallo"), Word("schlieben"), Word("eingeben"), Word("ritter"), Word("der"), Word("Milch"))
+    var currentWord by mutableStateOf(Word(title = "", translation = null, pronunciations = null, loaded = false))
     var pageIndex by mutableIntStateOf(words.size)
+
+    /**
+     * Invert the loaded state of the current word.
+     *
+     */
+    fun invertLoaded() {
+        currentWord = currentWord.copy(
+            loaded = !currentWord.loaded
+        )
+    }
 
     /**
      * Callback function that's invoked when searching a word, in order to load its pronunciations
@@ -66,13 +77,13 @@ class FloatingBubbleViewModel(
         val insertIndex = if (words.size == 0) 0 else pageIndex + 1
         words.find { it.title == word }.let {
             if (it == null) {
-                words.add(index = insertIndex, Word(title = word))
+                words.add(index = insertIndex, Word(title = word, translation = null, pronunciations = null, loaded = false))
                 pageIndex = insertIndex
                 currentWord = words[insertIndex]
                 expanded = true
                 try {
-                    translateWord(word = currentWord.title)
-                    loadPronunciations(searchTerm = currentWord.title)
+                    translateWord()
+                    loadPronunciations()
                 } catch (e: SocketTimeoutException) {
                     e.printStackTrace(); println(e.cause)
                 } catch (_: IOException) {}
@@ -91,15 +102,22 @@ class FloatingBubbleViewModel(
      *
      */
     // TODO: Add the ability to display auto-corrections for malformed words inputted by the user.
-    fun translateWord(word: String) = viewModelScope.launch {
-        // FIXME: Under certain conditions it raises an exception. When attempting to parse a lengthy paragraph with wordvomit within. IllegalArgumentException
-        try {
-            currentWord.translation = Translator().translate(
-                text = word,
-                source = Language.GERMAN,
-                target = Language.ENGLISH
-            ).translatedText
-        } catch (e: IllegalArgumentException) { e.printStackTrace(); println(e.cause) }
+    fun translateWord() = viewModelScope.launch {
+        Translator().translate(
+            text = currentWord.title,
+            source = Language.GERMAN,
+            target = Language.ENGLISH
+        ).let {
+            currentWord = currentWord.copy(
+                translation = mutableStateMapOf(
+                    currentWord.title to
+                    mutableStateListOf(Word.Translation(
+                        explanation = it.translatedText,
+                        examples = null
+                    ))
+                )
+            )
+        }
     }
 
     /**
@@ -109,7 +127,7 @@ class FloatingBubbleViewModel(
      * @param searchTerm The word to be pronounced.
      * @return Pronunciations object of the searched word.
      */
-    suspend fun grabAudioFiles(searchTerm: String) = retrofitInstance.wordPronunciations(
+    suspend fun grabAudioFiles(searchTerm: String) = retrofit.wordPronunciations(
         word = searchTerm.refine(),
         interfaceLanguageCode = UserLanguages.ENGLISH.code,
         languageCode = FORVO_LANGUAGE.GERMAN.code
@@ -120,18 +138,29 @@ class FloatingBubbleViewModel(
      *
      * @param searchTerm The desired word to be pronounced.
      */
-    fun loadPronunciations(searchTerm: String) = viewModelScope.launch {
-        currentWord.pronunciations = grabAudioFiles(searchTerm = searchTerm)
+    fun loadPronunciations() = viewModelScope.launch {
+        grabAudioFiles(searchTerm = currentWord.title).let {
+            it?.data?.forEach {
+                currentWord = currentWord.copy(
+                    pronunciations = it.items.map {
+                        it.original to
+                        Gson().fromJson(
+                            it.standard_pronunciation,
+                            Item.StandardPronunciation::class.java
+                        ).realmp3
+                    }.toMutableStateList()
+                )
+            }
+        }
     }
 
     /**
      * Play remote pronunciation audio.
      *
-     * @param searchTerm: The word to play its pronunciation.
+     * @param searchTerm The word to play its pronunciation.
     */
     fun playAudio(searchTerm: String) = currentWord
         .pronunciations
-        ?.parseAudios()
         ?.find { it.first == searchTerm }
         ?.let {
             viewModelScope.launch {
@@ -139,49 +168,20 @@ class FloatingBubbleViewModel(
             }
         }
 
-    private val database by lazy { WordDatabase.getDatabase(application) }
-    private val wordDao = database.wordDao
-
-    /**
-     * load words from the local Room database.
-     *
-     * @return Return a List of Words.
-     */
-    suspend fun loadWordsFromDb(): List<Word> = wordDao.getWords().map {
-        Word(
-            title = it.title,
-            translation = it.translation,
-            pronunciations = it.pronunciations,
-            loaded = it.loaded
-        )
-    }
-
-    fun insertWordToDb(word: Word) = viewModelScope.launch {
-        wordDao.insertWord(WordDb(
-            title = word.title,
-            translation = word.translation,
-            pronunciations = word.pronunciations,
-            loaded = true
-        ))
-    }
-
-    /**
-     * Remove a word from the database, but not from the current viewModel list.
-     *
-     * @param word The Word to be delete. Obtained frht moe current viewmodel.
-     */
-    fun removeWordFromDb(word: Word) = viewModelScope.launch {
-        wordDao.deleteWord(word.title)
-    }
-
     override fun onCleared() {
         super.onCleared()
         viewModelScope.cancel()
     }
 
+    override fun insertWordToDb(word: Word): Job = database.insertWordToDb(word)
+
+    override suspend fun loadWordsFromDb(): List<Word> = database.loadWordsFromDb()
+
+    override fun removeWordFromDb(wordTitle: String): Job = database.removeWordFromDb(wordTitle)
+
     init {
         viewModelScope.launch {
-            words.addAll(loadWordsFromDb())
+            words.addAll(database.loadWordsFromDb())
         }
     }
 
@@ -195,15 +195,3 @@ enum class FORVO_LANGUAGE(
     GERMAN("German", "de")
 }
 const val LOREM_IPSUM = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
-
-/**
- *
- * @return A List of string pairs representing the
- */
-fun Pronunciations.parseAudios() = this.data.firstOrNull()?.items?.map { item ->
-    item.original to
-    Gson().fromJson(
-        item.standard_pronunciation,
-        Item.StandardPronunciation::class.java
-    ).realmp3
-} ?: emptyList()
