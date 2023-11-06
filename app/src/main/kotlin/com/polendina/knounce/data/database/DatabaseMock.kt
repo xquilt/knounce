@@ -10,7 +10,28 @@ class DatabaseMock: Database {
         .map {
             Word(
                 title = it,
-                translation = null,
+                translation = listOf("Adjective", "Noun", "Adverb", "Preposition").map {
+                    it to
+                    (0..10).map {
+                        Word.Translation(
+                            explanation = listOf("More", "or", "less", "gaben", "kafka", "gai")
+                                .shuffled()
+                                .joinToString(" "),
+                            examples = (1..10).map {
+                                listOf(
+                                    "more",
+                                    "gaben",
+                                    "ich",
+                                    "hai",
+                                    "kanka",
+                                    "gestern"
+                                ).shuffled().joinToString(" ")
+                            }
+                        )
+                    }.toMutableList()
+//                    mutableListOf(
+//                    )
+                }.toMap().toMutableMap(),
                 pronunciations = null,
                 loaded = true
             )
