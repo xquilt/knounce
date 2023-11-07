@@ -1,8 +1,13 @@
 package com.polendina.knounce.presentation.flashcard.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +23,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,7 +44,6 @@ import com.polendina.knounce.data.database.DatabaseMock
 import com.polendina.knounce.data.database.Word
 import com.polendina.knounce.presentation.flashcard.viewmodel.FlashCardViewModelMock
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardContent(
     word: Word,
@@ -54,7 +58,7 @@ fun CardContent(
             .background(MaterialTheme.colorScheme.onPrimary)
     ) {
         Column (
-//            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
@@ -107,42 +111,63 @@ fun CardContent(
                     .fillMaxWidth()
             ) {
                 itemsIndexed(word.translation?.get(currentWordType) ?: emptyList()) {index, wordTranslation ->
+                    var showTranslation by remember { mutableStateOf(false) }
+                    var explanationExpanded by remember { mutableStateOf(false) }
                     Row (
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        modifier = Modifier
+                            .clickable (
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() },
+                                onClick = {
+                                    showTranslation = !showTranslation
+                                    explanationExpanded = !explanationExpanded
+                                }
+                            )
                     ) {
                         Box (
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
+                                .size(25.dp)
                                 .clip(CircleShape)
                                 .background(Color.Cyan)
-                                .size(20.dp)
                         ) {
                             Text(text = index.toString())
                         }
                         Text(
                             text = wordTranslation.explanation ?: "",
+                            maxLines = if (!explanationExpanded) 1 else Int.MAX_VALUE,
+                            overflow = TextOverflow.Ellipsis,
                             style = TextStyle(
                                 color = Color.Black
                             ),
                             modifier = Modifier
                                 .padding(vertical = 5.dp)
-                        )
-                    }
-                    wordTranslation.examples?.forEach {
-                        Text(
-                            text = "\"${it}\"",
-                            style = TextStyle(
-                                color = Color.Gray
-                            ),
-                            modifier = Modifier
-                                .padding(
-                                    horizontal = 25.dp
+                                .animateContentSize(
+                                    animationSpec = spring(
+                                        dampingRatio = Spring.DampingRatioLowBouncy,
+                                        stiffness = Spring.StiffnessLow
+                                    )
                                 )
                         )
                     }
-//                    Column {
-//                    }
+                    AnimatedVisibility(visible = showTranslation) {
+                        Column {
+                            wordTranslation.examples?.forEach {
+                                Text(
+                                    text = "\"${it}\"",
+                                    style = TextStyle(
+                                        color = Color.Gray
+                                    ),
+                                    modifier = Modifier
+                                        .padding(
+                                            horizontal = 25.dp
+                                        )
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
