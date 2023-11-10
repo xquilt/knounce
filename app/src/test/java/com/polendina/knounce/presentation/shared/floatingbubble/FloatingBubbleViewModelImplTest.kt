@@ -19,9 +19,9 @@ import org.robolectric.RuntimeEnvironment
 
 //@RunWith(MockitoJUnitRunner::class)
 @RunWith(RobolectricTestRunner::class)
-class FloatingBubbleViewModelTest {
+class FloatingBubbleViewModelImplTest {
 
-    private lateinit var floatingBubbleViewModel: FloatingBubbleViewModel
+    private lateinit var floatingBubbleViewModelImpl: FloatingBubbleViewModelImpl
     private lateinit var application: Application
     private var germanWords = listOf(
         Word(
@@ -91,7 +91,7 @@ class FloatingBubbleViewModelTest {
         Dispatchers.setMain(testDispatcher)
 //        application = Mockito.mock(Application::class.java)
         application = RuntimeEnvironment.getApplication()
-        floatingBubbleViewModel = FloatingBubbleViewModel(application, testDispatcher)
+        floatingBubbleViewModelImpl = FloatingBubbleViewModelImpl(application, testDispatcher)
     }
 
     @Test
@@ -102,9 +102,9 @@ class FloatingBubbleViewModelTest {
 //            floatingBubbleViewModel.currentWord = floatingBubbleViewModel.words.last()
 //            floatingBubbleViewModel.translateWord().join()
 //        }
-        floatingBubbleViewModel.currentWord = Word("danke", null, null, false)
-        floatingBubbleViewModel.translateWord().join()
-        println(floatingBubbleViewModel.currentWord)
+        floatingBubbleViewModelImpl.currentWord = Word("danke", null, null, false)
+        floatingBubbleViewModelImpl.translateWord().join()
+        println(floatingBubbleViewModelImpl.currentWord)
 //        assertEquals(
 //            germanWords.map { it.translation },
 //            val j = floatingBubbleViewModel.words.map { it.translation }
@@ -115,7 +115,7 @@ class FloatingBubbleViewModelTest {
     @Test
     fun grabAudioFiles() = runTest {
         germanWords.map { it.title }.map {
-            floatingBubbleViewModel.grabAudioFiles(
+            floatingBubbleViewModelImpl.grabAudioFiles(
                 searchTerm = it
             ).run {
                 println(this?.attributes?.total)
@@ -134,21 +134,21 @@ class FloatingBubbleViewModelTest {
         germanWords.subList(0, 1).forEach {
             println(it.title)
 //            floatingBubbleViewModel.srcWord = TextFieldValue(it.title)
-            floatingBubbleViewModel.currentWord = com.polendina.knounce.domain.model.WordDb(it.title)
-            floatingBubbleViewModel.loadPronunciations().join()
+            floatingBubbleViewModelImpl.currentWord = com.polendina.knounce.domain.model.WordDb(it.title)
+            floatingBubbleViewModelImpl.loadPronunciations().join()
         }
-        println(floatingBubbleViewModel.currentWord.pronunciations?.map { it.first })
+        println(floatingBubbleViewModelImpl.currentWord.pronunciations?.map { it.first })
 //        println(floatingBubbleViewModel.words.toList())
     }
 
     @Test
     fun searchWordTest() = runTest {
         germanWords.map { it.title }.forEach {
-            floatingBubbleViewModel.searchWord(it)
+            floatingBubbleViewModelImpl.searchWord(it)
         }
         assertEquals(
             germanWords.map { it.title }.filter { it.isNotBlank() }.distinct(),
-            floatingBubbleViewModel.words.toList().map { it.title }
+            floatingBubbleViewModelImpl.words.toList().map { it.title }
         )
     }
 
@@ -156,12 +156,12 @@ class FloatingBubbleViewModelTest {
     @Test
     fun loadWordsFromDbTest() = runTest {
         germanWords.forEach {
-            floatingBubbleViewModel.searchWord(it.title)
-            println(floatingBubbleViewModel.currentWord.title)
-            floatingBubbleViewModel.insertWordToDb(floatingBubbleViewModel.currentWord)
+            floatingBubbleViewModelImpl.searchWord(it.title)
+            println(floatingBubbleViewModelImpl.currentWord.title)
+            floatingBubbleViewModelImpl.insertWordToDb(floatingBubbleViewModelImpl.currentWord)
         }
         advanceUntilIdle()
-        println(floatingBubbleViewModel.loadWordsFromDb().map { it.title })
+        println(floatingBubbleViewModelImpl.loadWordsFromDb().map { it.title })
     }
 
 }
