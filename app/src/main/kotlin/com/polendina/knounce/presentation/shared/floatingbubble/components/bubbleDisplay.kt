@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
@@ -23,10 +24,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CheckCircle
@@ -53,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.polendina.knounce.data.database.Word
 import com.polendina.knounce.ui.theme.SearchFieldFontStyle
 import com.polendina.knounce.utils.wordByCharIndex
+import com.valentinilk.shimmer.shimmer
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -82,12 +82,17 @@ fun DisplayCard(
         ClickableText(
             text = AnnotatedString(text),
             style = SearchFieldFontStyle(),
-            onClick = {offset ->
+            onClick = { offset ->
                 onSrcCardWordClick(text.wordByCharIndex(index = offset))
             },
 //            color = color, // FIXME: I have no idea how to set color for AnnotatedString
-            modifier = Modifier
-                .verticalScroll(rememberScrollState(0))
+            modifier = if (text.isEmpty()) Modifier
+                .size(120.dp, 20.dp)
+                .clip(RoundedCornerShape(5.dp))
+                .shimmer()
+                .background(color = Color.LightGray)
+                else
+                Modifier
         )
     }
 }

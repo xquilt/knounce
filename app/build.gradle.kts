@@ -118,6 +118,7 @@ dependencies {
     androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestImplementation("androidx.test:rules:1.5.0")
 
+    implementation("com.valentinilk.shimmer:compose-shimmer:1.2.0")
 }
 
 //tasks.withType<Test> {
