@@ -69,7 +69,7 @@ fun CardContent(
                 text = word.title,
                 style = TextStyle(
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 40.sp,
                 )
             )
@@ -78,7 +78,7 @@ fun CardContent(
                     modifier = Modifier
                         .padding(5.dp)
                         .clip(RoundedCornerShape(15.dp))
-                        .background(Color.Cyan)
+                        .background(MaterialTheme.colorScheme.onPrimaryContainer)
                         .wrapContentSize()
                         .padding(5.dp)
                         .clickable {
@@ -89,7 +89,7 @@ fun CardContent(
                         text = it.key,
                         style = TextStyle(
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             fontSize = 10.sp,
                         )
                     )
@@ -131,9 +131,14 @@ fun CardContent(
                             modifier = Modifier
                                 .size(25.dp)
                                 .clip(CircleShape)
-                                .background(Color.Cyan)
+                                .background(MaterialTheme.colorScheme.onPrimaryContainer)
                         ) {
-                            Text(text = index.toString())
+                            Text(
+                                text = index.toString(),
+                                style = TextStyle(
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            )
                         }
                         Text(
                             text = wordTranslation.explanation ?: "",

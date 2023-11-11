@@ -27,4 +27,8 @@ class FlashCardViewModelImpl(
     override suspend fun loadWordsFromDb(): List<Word> = database.loadWordsFromDb()
     override fun removeWordFromDb(wordTitle: String): Job =
         database.removeWordFromDb(wordTitle = wordTitle)
+
+    override var elapsedSeconds: Long
+        get() = 0L
+        set(value) {}
 }

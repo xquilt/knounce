@@ -6,4 +6,5 @@ import com.polendina.knounce.data.database.Word
 
 interface FlashCardViewModel: Database {
     val words: SnapshotStateList<Word>
+    var elapsedSeconds: Long
 }

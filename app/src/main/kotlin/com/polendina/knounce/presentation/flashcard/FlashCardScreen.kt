@@ -29,14 +29,15 @@ import com.polendina.knounce.presentation.flashcard.components.CardContent
 import com.polendina.knounce.presentation.flashcard.components.WordsProgressBar
 import com.polendina.knounce.presentation.flashcard.viewmodel.FlashCardViewModel
 import com.polendina.knounce.presentation.flashcard.viewmodel.FlashCardViewModelMock
-import com.polendina.knounce.ui.theme.KnounceTheme
+import com.polendina.knounce.utils.formatElapsedLocalTime
+import java.time.LocalTime
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FlashCardScreen(
-    mainViewModel: FlashCardViewModel
+    flashCardViewModel: FlashCardViewModel
 ) {
-    val horizontalPagerState = rememberPagerState (initialPage = 0) { mainViewModel.words.size }
+    val horizontalPagerState = rememberPagerState (initialPage = 0) { flashCardViewModel.words.size }
     Scaffold (
         topBar = {
              Row (
@@ -48,21 +49,32 @@ fun FlashCardScreen(
              ){
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
                 )
-                 WordsProgressBar(wordIndex = horizontalPagerState.currentPage, totalWordsCount = mainViewModel.words.size)
-                 Row {
+                 WordsProgressBar(
+                     wordIndex = horizontalPagerState.currentPage,
+                     totalWordsCount = flashCardViewModel.words.size
+                 )
+                 Row (
+                     verticalAlignment = Alignment.CenterVertically,
+                     horizontalArrangement = Arrangement.spacedBy(2.dp)
+                 ){
                      Icon(imageVector = Icons.Default.Alarm, contentDescription = null)
-                     Text(text = "3'15\"")
+                     Text(
+                         text = LocalTime
+                             .ofSecondOfDay(flashCardViewModel.elapsedSeconds)
+                             .formatElapsedLocalTime()
+                     )
                  }
              }
         },
         bottomBar = {
             FlashCardBottomBar()
         },
-        containerColor = MaterialTheme.colorScheme.errorContainer,
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.errorContainer)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
             .padding(10.dp)
     ) {
         Column (
@@ -71,13 +83,13 @@ fun FlashCardScreen(
                 .fillMaxSize()
                 .padding(it)
         ) {
-            AnimatedVisibility(visible = mainViewModel.words.isNotEmpty()) {
+            AnimatedVisibility(visible = flashCardViewModel.words.isNotEmpty()) {
                 HorizontalPager(
                     state = horizontalPagerState,
                     pageSpacing = 10.dp
                 ) {
                     CardContent(
-                        word = mainViewModel.words[it],
+                        word = flashCardViewModel.words[it],
                     )
                 }
             }
@@ -88,9 +100,7 @@ fun FlashCardScreen(
 @Preview(showBackground = true)
 @Composable
 fun FlashCardScreenPreview() {
-    KnounceTheme {
-        FlashCardScreen(
-            mainViewModel = FlashCardViewModelMock(database = DatabaseMock())
-        )
-    }
+    FlashCardScreen(
+        flashCardViewModel = FlashCardViewModelMock(database = DatabaseMock())
+    )
 }
