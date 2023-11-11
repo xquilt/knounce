@@ -6,15 +6,15 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class DatabaseMock: Database {
-    private val _words = listOf("eingeben", "milch", "wasser", "hallo", "ich", "")
+    private val _words = listOf("more", "gaben", "ich", "hai", "kanka", "gestern", "gaben", "ich", "hai")
         .map {
             Word(
                 title = it,
                 translation = listOf("Adjective", "Noun", "Adverb", "Preposition").map {
                     it to
-                    (0..10).map {
+                    (1..10).map {
                         Word.Translation(
-                            explanation = listOf("More", "or", "less", "gaben", "kafka", "gai")
+                            explanation = listOf("More", "or", "less", "gaben", "kafka", "gai", "gaben", "ich", "kane", "heins")
                                 .shuffled()
                                 .joinToString(" "),
                             examples = (1..10).map {
@@ -24,7 +24,10 @@ class DatabaseMock: Database {
                                     "ich",
                                     "hai",
                                     "kanka",
-                                    "gestern"
+                                    "gestern",
+                                    "gaben",
+                                    "ich",
+                                    "hai",
                                 ).shuffled().joinToString(" ")
                             }
                         )

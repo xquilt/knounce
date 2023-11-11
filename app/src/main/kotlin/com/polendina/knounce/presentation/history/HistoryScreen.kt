@@ -15,27 +15,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.gson.Gson
-import com.google.gson.JsonElement
-import com.polendina.knounce.data.database.WordDb
-import com.polendina.knounce.domain.model.Item
-import com.polendina.knounce.domain.model.Pronunciations
-
-//@Composable
-//fun HistoryScreen(
-//    viewMode: ViewModel
-//) {
-//    Scaffold ( ) {
-//    }
-//}
+import com.polendina.knounce.data.database.DatabaseMock
+import com.polendina.knounce.data.database.Word
+import com.polendina.knounce.presentation.flashcard.viewmodel.FlashCardViewModelMock
 
 @Composable
 fun HistoryItem(
-    word: WordDb
+    word: Word
 ) {
     Box (
         modifier = Modifier
@@ -49,11 +40,9 @@ fun HistoryItem(
                 .fillMaxSize()
         ) {
             Text(text = word.title)
-            word.pronunciations?.data?.first()?.items?.let {
-                LazyRow {
-                    items(it) {
-                        Text(text = it.word)
-                    }
+            LazyRow {
+                items(word.pronunciations ?: mutableListOf()) {
+                    Text(text = it.second)
                 }
             }
         }
@@ -62,7 +51,7 @@ fun HistoryItem(
 
 @Composable
 fun HistoryItems(
-    words: MutableList<WordDb>,
+    words: SnapshotStateList<Word>,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -82,34 +71,9 @@ fun HistoryItems(
 fun HistoryItemsPreview(
 
 ) {
-    val words = listOf("eingeben", "milch", "wasser", "hallo", "ich", "")
-    val wordsDbList = words
-        .map {
-            WordDb(
-                title = it,
-                translation = "",
-                pronunciations = Pronunciations(
-                    status = "",
-                    attributes = Pronunciations.Attributes(total = 23, 20),
-                    data = listOf(Pronunciations.Datum(
-                        language = "English",
-                        translation = "Hello",
-                        20,
-                        items = words.map { Item(
-                            id = 0,
-                            word = it,
-                            original = it,
-                            num_pronunciations = "",
-                            standard_pronunciation = Gson().fromJson("{\"name\": 10}",
-                            JsonElement::class.java)
-                        ) }
-                    ))
-                ),
-                loaded = true
-            )
-        }
     HistoryItems(
-        words = wordsDbList.toMutableList(),
+        // TODO: The following viewmodel should be renamed to something more appropriate.
+        words = FlashCardViewModelMock(database = DatabaseMock()).words,
         modifier = Modifier
             .padding(10.dp)
     )

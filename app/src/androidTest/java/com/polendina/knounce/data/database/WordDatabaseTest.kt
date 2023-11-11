@@ -31,7 +31,7 @@ class WordDatabaseTest {
     @Test
     fun deleteWord() = runTest {
         listOf("nich", "nicht").forEach {
-            wordDao.insertWord(WordDb(it, "", null, true))
+            wordDao.insertWord(Word(title = it, translation = null,pronunciations = null, loaded = false))
         }
         wordDao.deleteWord("nicht")
         assertEquals(

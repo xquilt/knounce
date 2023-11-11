@@ -29,10 +29,12 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.polendina.knounce.PronunciationPlayer
+import com.polendina.knounce.data.database.DatabaseMock
 import com.polendina.knounce.data.database.Word
 import com.polendina.knounce.presentation.shared.floatingbubble.components.SearchWordExpandedComposable
+import com.polendina.knounce.presentation.shared.floatingbubble.viewModel.FloatingBubbleViewModel
+import com.polendina.knounce.presentation.shared.floatingbubble.viewModel.FloatingBubbleViewModelMock
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -85,7 +87,7 @@ fun ExpandedCompose(
                         srcWordDisplay = floatingBubbleViewModel.currentWord.title,
                         targetWordDisplay = floatingBubbleViewModel.currentWord.translation,
                         onSrcCardClick = {
-                            Log.d("MORE", "minimized!")
+                            Log.d("MORE","minimized!")
                             floatingBubbleViewModel.expanded = false
                         },
                         onSrcCardWordClick = {
@@ -170,6 +172,6 @@ fun ExpandedCompose(
 @Composable
 fun ExpandedComposePreview() {
     ExpandedCompose(
-        floatingBubbleViewModel = viewModel(),
+        floatingBubbleViewModel = FloatingBubbleViewModelMock(database = DatabaseMock()),
     )
 }
