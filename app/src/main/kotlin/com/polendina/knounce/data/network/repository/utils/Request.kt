@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
-import com.google.gson.JsonObject
 import com.polendina.knounce.domain.model.FromToResponse
 import com.polendina.knounce.domain.model.Item
 import com.polendina.knounce.domain.model.LanguageCodes
@@ -42,7 +41,7 @@ interface AutoCompletion {
     fun autocompleteWords(@Query("term") term: String): Call<List<String>>
 }
 
-val retrofit: Retrofit = Retrofit.Builder()
+val retrofit = Retrofit.Builder()
     .baseUrl("https://apicorporate.forvo.com/api2/v1.2/d6a0d68b18fbcf26bcbb66ec20739492/")
     .addConverterFactory(GsonConverterFactory.create(
         GsonBuilder()
@@ -50,6 +49,7 @@ val retrofit: Retrofit = Retrofit.Builder()
             .create()
     ))
     .build()
+    .create(RemoteApi::class.java)
 
 /**
  * JsonDeserializer to mitigate for varying Json responses.
@@ -69,5 +69,3 @@ class P: JsonDeserializer<Item> {
         }
     }
 }
-
-val retrofitInstance = retrofit.create(RemoteApi::class.java)

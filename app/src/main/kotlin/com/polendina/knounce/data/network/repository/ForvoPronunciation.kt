@@ -1,25 +1,18 @@
 package com.polendina.knounce.data.repository.pronunciation
 
-import android.util.Log
 import com.polendina.knounce.domain.model.FromToResponse
 import com.polendina.knounce.domain.model.LanguageCodes
 import com.polendina.knounce.domain.model.Pronunciations
 import com.polendina.knounce.domain.model.UserLanguages
 import com.polendina.knounce.domain.repository.PronunciationRepository
-import org.slf4j.event.Level
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import trancore.corelib.pronunciation.retrofitInstance
-import java.util.logging.Logger
-
-fun addTwo(one: Int, two: Int): Int {
-    return (one + two)
-}
+import trancore.corelib.pronunciation.retrofit
 
 object ForvoPronunciation: PronunciationRepository {
     override fun languageCodes(callback: (response: LanguageCodes?) -> Unit) {
-        retrofitInstance.languageCodes(UserLanguages.ENGLISH.code).enqueue(object: Callback<LanguageCodes> {
+        retrofit.languageCodes(UserLanguages.ENGLISH.code).enqueue(object: Callback<LanguageCodes> {
             override fun onResponse(call: Call<LanguageCodes>, response: Response<LanguageCodes>) {
                 callback(response.body())
             }
@@ -34,7 +27,7 @@ object ForvoPronunciation: PronunciationRepository {
         interfaceLanguageCode: String,
         callback: (pronunciations: Pronunciations?) -> Unit
     ) {
-        retrofitInstance.wordPronunciations(
+        retrofit.wordPronunciations(
             word = word,
             languageCode = languageCode,
             interfaceLanguageCode = interfaceLanguageCode
@@ -53,7 +46,7 @@ object ForvoPronunciation: PronunciationRepository {
         interfaceLanguageCode: String,
         callback: (pronunciations: Pronunciations?) -> Unit
     ) {
-        retrofitInstance.wordPronunciationsAll(
+        retrofit.wordPronunciationsAll(
             word = word,
             interfaceLanguageCode = interfaceLanguageCode
         ).enqueue(object: Callback<Pronunciations> {
@@ -72,7 +65,7 @@ object ForvoPronunciation: PronunciationRepository {
         interfaceLanguageCode: String,
         callback: (pronunciations: Pronunciations?) -> Unit
     ) {
-        retrofitInstance.phrasePronunciations(
+        retrofit.phrasePronunciations(
             word = word,
             languageCode = languageCode,
             interfaceLanguageCode = interfaceLanguageCode
@@ -91,7 +84,7 @@ object ForvoPronunciation: PronunciationRepository {
         interfaceLanguageCode: String,
         callback: (pronunciations: Pronunciations?) -> Unit
     ) {
-        retrofitInstance.phrasePronunciationsAll(
+        retrofit.phrasePronunciationsAll(
             word = word,
             interfaceLanguageCode = interfaceLanguageCode
         ).enqueue(object:
@@ -109,7 +102,7 @@ object ForvoPronunciation: PronunciationRepository {
         interfaceLanguage: String,
         callback: (response: FromToResponse?) -> Unit
     ) {
-        retrofitInstance.pronunciationTranslationMap(interfaceLanguage).enqueue(object: Callback<FromToResponse> {
+        retrofit.pronunciationTranslationMap(interfaceLanguage).enqueue(object: Callback<FromToResponse> {
             override fun onResponse(call: Call<FromToResponse>, response: Response<FromToResponse>) {
                 callback(response.body())
             }
@@ -124,7 +117,7 @@ object ForvoPronunciation: PronunciationRepository {
         fromToLanguageCode: String,
         callback: (response: Pronunciations?) -> Unit
     ): Unit {
-        retrofitInstance.searchTranslation(
+        retrofit.searchTranslation(
             word = word,
             fromToLanguageCode = fromToLanguageCode,
             languageCode = UserLanguages.FRANCAIS.code
@@ -144,7 +137,7 @@ object ForvoPronunciation: PronunciationRepository {
         languageCode: String,
         callback: (response: Pronunciations?) -> Unit
     ): Unit {
-        retrofitInstance.alternativePronunciations(
+        retrofit.alternativePronunciations(
             wordPhrase = wordPhrase,
             languageCode = languageCode
         ).enqueue(object: Callback<Pronunciations> {
