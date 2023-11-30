@@ -49,7 +49,7 @@ class FloatingBubbleViewModelImpl(
 //    val clipboardManager = application.getSystemService(Service.CLIPBOARD_SERVICE) as ClipboardManager
 //    private val clipboardContent = clipboardManager.primaryClip?.getItemAt(0)?.text.toString()
     override val words = mutableStateListOf<Word>()
-    override var currentWord by mutableStateOf(Word(title = "", translation = null, pronunciations = null, loaded = false))
+    override var currentWord by mutableStateOf(Word())
     override var pageIndex by mutableIntStateOf(words.size)
 
     /**
@@ -75,13 +75,13 @@ class FloatingBubbleViewModelImpl(
         val insertIndex = if (words.size == 0) 0 else pageIndex + 1
         words.find { it.title == word }.let {
             if (it == null) {
-                words.add(index = insertIndex, Word(title = word, translation = null, pronunciations = null, loaded = false))
+                words.add(index = insertIndex, Word(title = word))
                 pageIndex = insertIndex
                 currentWord = words[insertIndex]
                 expanded = true
                 try {
-                    translateWord()
-                    loadPronunciations()
+                    translateWord(word = currentWord)
+                    loadPronunciations(word = currentWord)
                 } catch (e: SocketTimeoutException) {
                     e.printStackTrace(); println(e.cause)
                 } catch (_: IOException) {}
@@ -100,13 +100,13 @@ class FloatingBubbleViewModelImpl(
      *
      */
     // TODO: Add the ability to display auto-corrections for malformed words inputted by the user.
-    override fun translateWord() = viewModelScope.launch {
+    override fun translateWord(word: Word) = viewModelScope.launch {
         Translator().translate(
-            text = currentWord.title,
+            text = word.title,
             source = Language.GERMAN,
             target = Language.ENGLISH
         ).let {
-            currentWord = currentWord.copy(
+             currentWord.copy(
                 translation = mutableStateMapOf(
                     currentWord.title to
                     mutableStateListOf(Word.Translation(
@@ -114,7 +114,10 @@ class FloatingBubbleViewModelImpl(
                         examples = null
                     ))
                 )
-            )
+            ).let {
+                 currentWord = it
+                 words[pageIndex] = it
+             }
         }
     }
 
@@ -136,10 +139,10 @@ class FloatingBubbleViewModelImpl(
      *
      * @param searchTerm The desired word to be pronounced.
      */
-    override fun loadPronunciations() = viewModelScope.launch {
-        grabAudioFiles(searchTerm = currentWord.title).let {
+    override fun loadPronunciations(word: Word) = viewModelScope.launch {
+        grabAudioFiles(searchTerm = word.title).let {
             it?.data?.forEach {
-                currentWord = currentWord.copy(
+                currentWord.copy(
                     pronunciations = it.items.map {
                         it.original to
                         Gson().fromJson(
@@ -147,7 +150,10 @@ class FloatingBubbleViewModelImpl(
                             Item.StandardPronunciation::class.java
                         ).realmp3
                     }.toMutableStateList()
-                )
+                ).let {
+                    currentWord = it
+                    words[pageIndex] = it
+                }
             }
         }
     }

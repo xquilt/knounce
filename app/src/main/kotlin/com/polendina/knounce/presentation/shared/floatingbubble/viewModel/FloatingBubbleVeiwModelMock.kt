@@ -35,7 +35,7 @@ class FloatingBubbleViewModelMock(
         TODO("Not yet implemented")
     }
 
-    override fun translateWord(): Job {
+    override fun translateWord(word: Word): Job {
         TODO("Not yet implemented")
     }
 
@@ -43,7 +43,7 @@ class FloatingBubbleViewModelMock(
         TODO("Not yet implemented")
     }
 
-    override fun loadPronunciations(): Job {
+    override fun loadPronunciations(word: Word): Job {
         TODO("Not yet implemented")
     }
 

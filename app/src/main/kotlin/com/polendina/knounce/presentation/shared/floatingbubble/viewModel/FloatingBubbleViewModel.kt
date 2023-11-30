@@ -16,8 +16,8 @@ interface FloatingBubbleViewModel: Database {
     var pageIndex: Int
     fun invertLoaded(): Unit
     fun searchWord(word: String)
-    fun translateWord(): Job
+    fun translateWord(word: Word): Job
     suspend fun grabAudioFiles(searchTerm: String): Pronunciations?
-    fun loadPronunciations(): Job
+    fun loadPronunciations(word: Word): Job
     fun playAudio(searchTerm: String): Job?
 }

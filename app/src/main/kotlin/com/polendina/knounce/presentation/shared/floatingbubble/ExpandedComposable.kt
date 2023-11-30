@@ -119,7 +119,7 @@ fun ExpandedCompose(
                     LaunchedEffect(horizontalPagerState) {
                         snapshotFlow{horizontalPagerState.currentPage}.collect { page ->
                             floatingBubbleViewModel.pageIndex = page
-                            floatingBubbleViewModel.currentWord = floatingBubbleViewModel.words.getOrNull(floatingBubbleViewModel.pageIndex) ?: Word(title = "", translation = null, pronunciations = null, loaded = false)
+                            floatingBubbleViewModel.currentWord = floatingBubbleViewModel.words.getOrNull(floatingBubbleViewModel.pageIndex) ?: Word()
                             floatingBubbleViewModel.srcWord = TextFieldValue(
                                 text = floatingBubbleViewModel.currentWord.title,
                                 selection = TextRange(floatingBubbleViewModel.currentWord.title.length)
