@@ -172,6 +172,9 @@ fun ExpandedCompose(
 @Composable
 fun ExpandedComposePreview() {
     ExpandedCompose(
-        floatingBubbleViewModel = FloatingBubbleViewModelMock(database = DatabaseMock()),
+        floatingBubbleViewModel = FloatingBubbleViewModelMock(database = DatabaseMock(
+            emptyExplanations = true,
+            emptyPronunciations = true
+        )),
     )
 }

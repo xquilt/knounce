@@ -17,8 +17,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -87,10 +87,11 @@ fun DisplayCard(
             },
 //            color = color, // FIXME: I have no idea how to set color for AnnotatedString
             modifier = if (text.isEmpty()) Modifier
+                .padding(vertical = 10.dp)
                 .size(120.dp, 20.dp)
                 .clip(RoundedCornerShape(5.dp))
                 .shimmer()
-                .background(color = Color.LightGray)
+                .background(color = MaterialTheme.colorScheme.onPrimary)
                 else
                 Modifier
         )
@@ -178,32 +179,17 @@ fun ExpandedBubbleBody(
                 .height(35.dp)
                 .fillMaxWidth()
         ) {
-            items(audios) {
-                Box(
-                    contentAlignment = Alignment.Center,
+            if (audios.isEmpty()) {
+                items((0..20).map { "" to "" }.toList()) { PronunciationChip(
+                    pronunciation = it,
+                    audioClicked = {},
                     modifier = Modifier
-                        .clickable {
-                            audioClicked(it)
-                        }
-                        .fillMaxHeight()
-                        .wrapContentWidth()
-                        .clip(RoundedCornerShape(5.dp))
-                        .background(MaterialTheme.colorScheme.secondaryContainer)
-                        .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            shape = RoundedCornerShape(5.dp)
-                        )
-                ) {
-                    Text(
-                        text = it.first,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier
-                            .padding(
-                                horizontal = 10.dp,
-                            )
-                            .wrapContentSize()
-                    )
+                        .width(50.dp)
+                        .shimmer()
+                )}
+            } else {
+                items(audios) {
+                    PronunciationChip(pronunciation = it, audioClicked = audioClicked)
                 }
             }
         }
@@ -227,6 +213,40 @@ fun ExpandedBubbleBody(
                     weight = 1f,
                     fill = false
                 )
+        )
+    }
+}
+
+@Composable
+fun PronunciationChip(
+    pronunciation: Pair<String, String>,
+    audioClicked: (Pair<String, String>) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .clickable {
+                audioClicked(pronunciation)
+            }
+            .fillMaxHeight()
+//            .wrapContentWidth()
+            .clip(RoundedCornerShape(5.dp))
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.onPrimary,
+                shape = RoundedCornerShape(5.dp)
+            )
+    ) {
+        Text(
+            text = pronunciation.first,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            modifier = Modifier
+                .padding(
+                    horizontal = 10.dp,
+                )
+                .wrapContentSize()
         )
     }
 }
