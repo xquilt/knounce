@@ -3,6 +3,7 @@ package com.polendina.knounce.presentation.shared.floatingbubble
 import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
+import com.polendina.knounce.data.database.DatabaseMock
 import com.polendina.knounce.data.database.Word
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -91,7 +92,7 @@ class FloatingBubbleViewModelImplTest {
         Dispatchers.setMain(testDispatcher)
 //        application = Mockito.mock(Application::class.java)
         application = RuntimeEnvironment.getApplication()
-        floatingBubbleViewModelImpl = FloatingBubbleViewModelImpl(application, testDispatcher)
+        floatingBubbleViewModelImpl = FloatingBubbleViewModelImpl(application, testDispatcher, database = DatabaseMock())
     }
 
     @Test
@@ -134,8 +135,8 @@ class FloatingBubbleViewModelImplTest {
         germanWords.subList(0, 1).forEach {
             println(it.title)
 //            floatingBubbleViewModel.srcWord = TextFieldValue(it.title)
-            floatingBubbleViewModelImpl.currentWord = com.polendina.knounce.domain.model.WordDb(it.title)
-            floatingBubbleViewModelImpl.loadPronunciations().join()
+            floatingBubbleViewModelImpl.currentWord = it
+            floatingBubbleViewModelImpl.loadPronunciations(word = it).join()
         }
         println(floatingBubbleViewModelImpl.currentWord.pronunciations?.map { it.first })
 //        println(floatingBubbleViewModel.words.toList())
