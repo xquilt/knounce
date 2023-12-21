@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.polendina.knounce.PronunciationPlayer
 import com.polendina.knounce.data.database.Database
@@ -19,9 +20,6 @@ import com.polendina.knounce.domain.model.UserLanguages
 import com.polendina.knounce.presentation.shared.floatingbubble.viewModel.FloatingBubbleViewModel
 import com.polendina.knounce.utils.refine
 import com.polendina.knounce.utils.swap
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -34,14 +32,10 @@ import java.net.SocketTimeoutException
 
 class FloatingBubbleViewModelImpl(
     private val application: Application,
-    coroutineDispatcher: CoroutineDispatcher = Dispatchers.Main,
     val database: Database
-//    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
-//    private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : AndroidViewModel(application), FloatingBubbleViewModel {
     override var srcWord by mutableStateOf(TextFieldValue(""))
     override var targetWordDisplay by mutableStateOf("")
-    val viewModelScope = CoroutineScope(coroutineDispatcher)
 
     override var expanded by mutableStateOf(true)
 
@@ -80,8 +74,8 @@ class FloatingBubbleViewModelImpl(
                 currentWord = words[insertIndex]
                 expanded = true
                 try {
-                    translateWord(word = currentWord)
-                    loadPronunciations(word = currentWord)
+                    translateWord(word = currentWord.title)
+                    loadPronunciations(word = currentWord.title)
                 } catch (e: SocketTimeoutException) {
                     e.printStackTrace(); println(e.cause)
                 } catch (_: IOException) {}
@@ -100,9 +94,9 @@ class FloatingBubbleViewModelImpl(
      *
      */
     // TODO: Add the ability to display auto-corrections for malformed words inputted by the user.
-    override fun translateWord(word: Word) = viewModelScope.launch {
+    override fun translateWord(word: String) = viewModelScope.launch {
         Translator().translate(
-            text = word.title,
+            text = word,
             source = Language.GERMAN,
             target = Language.ENGLISH
         ).let {
@@ -139,8 +133,8 @@ class FloatingBubbleViewModelImpl(
      *
      * @param searchTerm The desired word to be pronounced.
      */
-    override fun loadPronunciations(word: Word) = viewModelScope.launch {
-        grabAudioFiles(searchTerm = word.title).let {
+    override fun loadPronunciations(word: String) = viewModelScope.launch {
+        grabAudioFiles(searchTerm = word).let {
             it?.data?.forEach {
                 currentWord.copy(
                     pronunciations = it.items.map {
