@@ -1,10 +1,11 @@
 package com.polendina.knounce.domain.repository
 
+import com.polendina.knounce.data.database.Word
 import com.polendina.knounce.domain.model.FromToResponse
 import com.polendina.knounce.domain.model.LanguageCodes
 import com.polendina.knounce.domain.model.Pronunciations
 
-interface PronunciationRepository {
+interface PronunciationsRepository {
     /**
      *  Return the from-to language codes of the respective languages for each available language.
      *
@@ -59,4 +60,10 @@ interface PronunciationRepository {
      * @param callback The callback code, that takes the returned response as a callback argument.
     */
     fun wordPhraseAlternatives(wordPhrase: String, languageCode: String, callback: (response: Pronunciations?) -> Unit): Unit
+    /**
+     *
+     * @param word The word to look up
+     * @return Return the locally saved/cached word, or else return null
+    */
+    suspend fun loadWordsOfflineFirst(): List<Word>
 }

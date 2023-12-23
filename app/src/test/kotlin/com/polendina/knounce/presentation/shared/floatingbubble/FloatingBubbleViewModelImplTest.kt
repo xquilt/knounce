@@ -3,9 +3,9 @@ package com.polendina.knounce.presentation.shared.floatingbubble
 import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
-import com.polendina.knounce.data.database.DatabaseMock
-import com.polendina.knounce.data.database.DatabaseImpl
+import androidx.test.core.app.ApplicationProvider
 import com.polendina.knounce.data.database.Word
+import com.polendina.knounce.presentation.pronunciationsscreen.pronunciationsRepositoryImpl
 import com.polendina.knounce.utils.refine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -94,11 +94,11 @@ class FloatingBubbleViewModelImplTest {
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
 //        application = Mockito.mock(Application::class.java)
+//        application = ApplicationProvider.getApplicationContext()
         application = RuntimeEnvironment.getApplication()
-        floatingBubbleViewModelImpl = FloatingBubbleViewModelImpl(application, database = DatabaseMock())
         floatingBubbleViewModelImpl = FloatingBubbleViewModelImpl(
             application = application,
-            database = DatabaseImpl(application = application)
+            pronunciationsRepository = pronunciationsRepositoryImpl(application = application)
         )
     }
 
@@ -131,7 +131,7 @@ class FloatingBubbleViewModelImplTest {
             println(it.title)
 //            floatingBubbleViewModel.srcWord = TextFieldValue(it.title)
             floatingBubbleViewModelImpl.currentWord = it
-            floatingBubbleViewModelImpl.loadPronunciations(word = it).join()
+            floatingBubbleViewModelImpl.loadPronunciations(word = it.title).join()
             germanWords.take(1).forEachIndexed { index, word ->
                 floatingBubbleViewModelImpl.searchWord(word.title)
                 floatingBubbleViewModelImpl.loadPronunciations(word.title)
@@ -161,7 +161,7 @@ class FloatingBubbleViewModelImplTest {
         germanWords.forEach {
             floatingBubbleViewModelImpl.searchWord(it.title)
             println(floatingBubbleViewModelImpl.currentWord.title)
-            floatingBubbleViewModelImpl.insertWordToDb(floatingBubbleViewModelImpl.currentWord)
+//            floatingBubbleViewModelImpl.insertWordToDb(floatingBubbleViewModelImpl.currentWord)
         }
         advanceUntilIdle()
         println(floatingBubbleViewModelImpl.loadWordsFromDb().map { it.title })

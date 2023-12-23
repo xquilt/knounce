@@ -21,7 +21,8 @@ class FloatingBubbleViewModelMock(
 
     override var expanded: Boolean by mutableStateOf(true)
     override val words: SnapshotStateList<Word>
-        get() = runBlocking { loadWordsFromDb() }.toMutableStateList()
+//        get() = runBlocking { loadWordsFromDb() }.toMutableStateList()
+        get() = emptyList<Word>().toMutableStateList()
     override var currentWord: Word by mutableStateOf(words.random())
     override var pageIndex: Int
         get() = words.indexOf(currentWord)
@@ -35,7 +36,7 @@ class FloatingBubbleViewModelMock(
         TODO("Not yet implemented")
     }
 
-    override fun translateWord(word: Word): Job {
+    override fun translateWord(word: String): Job {
         TODO("Not yet implemented")
     }
 
@@ -43,16 +44,11 @@ class FloatingBubbleViewModelMock(
         TODO("Not yet implemented")
     }
 
-    override fun loadPronunciations(word: Word): Job {
+    override fun loadPronunciations(word: String): Job {
         TODO("Not yet implemented")
     }
 
     override fun playAudio(searchTerm: String): Job? {
         TODO("Not yet implemented")
     }
-
-    override fun insertWordToDb(word: Word): Job = database.removeWordFromDb(wordTitle = word.title)
-
-    override suspend fun loadWordsFromDb(): List<Word> = database.loadWordsFromDb()
-    override fun removeWordFromDb(wordTitle: String): Job = database.removeWordFromDb(wordTitle = wordTitle)
 }

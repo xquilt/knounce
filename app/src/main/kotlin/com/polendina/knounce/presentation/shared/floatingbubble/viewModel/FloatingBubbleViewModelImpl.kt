@@ -13,10 +13,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.polendina.knounce.PronunciationPlayer
-import com.polendina.knounce.data.database.Database
 import com.polendina.knounce.data.database.Word
 import com.polendina.knounce.domain.model.Item
+import com.polendina.knounce.domain.model.Pronunciations
 import com.polendina.knounce.domain.model.UserLanguages
+import com.polendina.knounce.domain.repository.PronunciationsRepository
 import com.polendina.knounce.presentation.shared.floatingbubble.viewModel.FloatingBubbleViewModel
 import com.polendina.knounce.utils.refine
 import com.polendina.knounce.utils.swap
@@ -25,14 +26,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import me.bush.translator.Language
 import me.bush.translator.Translator
-import retrofit2.awaitResponse
-import trancore.corelib.pronunciation.retrofit
 import java.io.IOException
 import java.net.SocketTimeoutException
 
 class FloatingBubbleViewModelImpl(
     private val application: Application,
-    val database: Database
+    private val pronunciationsRepository: PronunciationsRepository
 ) : AndroidViewModel(application), FloatingBubbleViewModel {
     override var srcWord by mutableStateOf(TextFieldValue(""))
     override var targetWordDisplay by mutableStateOf("")
@@ -122,11 +121,17 @@ class FloatingBubbleViewModelImpl(
      * @param searchTerm The word to be pronounced.
      * @return Pronunciations object of the searched word.
      */
-    override suspend fun grabAudioFiles(searchTerm: String) = retrofit.wordPronunciations(
-        word = searchTerm.refine(),
-        interfaceLanguageCode = UserLanguages.ENGLISH.code,
-        languageCode = FORVO_LANGUAGE.GERMAN.code
-    ).awaitResponse().body()
+    override suspend fun grabAudioFiles(searchTerm: String): Pronunciations? {
+        var returnValue: Pronunciations? = null
+        pronunciationsRepository.wordPronunciations(
+            word = searchTerm.refine(),
+            interfaceLanguageCode = UserLanguages.ENGLISH.code,
+            languageCode = FORVO_LANGUAGE.GERMAN.code
+        ) {
+            returnValue = it
+        }
+        return (returnValue)
+    }
 
     /**
      * If the word pronunciations aren't already loaded, then simply retrieve and append them.
@@ -171,15 +176,14 @@ class FloatingBubbleViewModelImpl(
         viewModelScope.cancel()
     }
 
-    override fun insertWordToDb(word: Word): Job = database.insertWordToDb(word)
+    suspend fun loadWordsFromDb(): List<Word> = pronunciationsRepository.loadWordsOfflineFirst()
 
-    override suspend fun loadWordsFromDb(): List<Word> = database.loadWordsFromDb()
-
-    override fun removeWordFromDb(wordTitle: String): Job = database.removeWordFromDb(wordTitle)
-
+//    override fun insertWordToDb(word: Word): Job = database.insertWordToDb(word)
+//
+//    override fun removeWordFromDb(wordTitle: String): Job = database.removeWordFromDb(wordTitle)
     init {
         viewModelScope.launch {
-            words.addAll(database.loadWordsFromDb())
+            words.addAll(pronunciationsRepository.loadWordsOfflineFirst())
         }
     }
 

@@ -8,16 +8,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.polendina.knounce.PronunciationPlayer
-import com.polendina.knounce.data.repository.pronunciation.ForvoPronunciation
+import com.polendina.knounce.data.database.WordDatabase
+import com.polendina.knounce.data.network.ForvoService
+import com.polendina.knounce.data.repository.PronunciationsRepositoryImpl
 import com.polendina.knounce.domain.model.Item
 import com.polendina.knounce.domain.model.Pronunciations
 import com.polendina.knounce.domain.model.UserLanguages
+import com.polendina.knounce.domain.repository.PronunciationsRepository
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import trancore.corelib.pronunciation.P
 
 class PronunciationsViewModel(
-    application: Application = Application(),
-//    private val pronunciationRepository: ForvoPronunciation // its methods were getting skipped over when called down below
-//): ViewModel() {
+    private val application: Application = Application(),
+    private val pronunciationRepository: PronunciationsRepository // its methods were getting skipped over when called down below
 ): AndroidViewModel(application) {
 
     // Expose screen UI state
@@ -27,7 +33,7 @@ class PronunciationsViewModel(
     private val _languages = mutableStateListOf<String>("Arabic", "English", "French", "Spanish", "Interlingua")
     val highlightedLanguages = mutableStateListOf<LanguageSelected>()
     var networkConnected = false
-        get() = NetworkHandler(context = getApplication<Application>()).isNetworkAvailable()
+        get() = NetworkHandler(context = application).isNetworkAvailable()
         private set
 
     var showImage by mutableStateOf(false)
@@ -54,7 +60,8 @@ class PronunciationsViewModel(
     fun wordPronunciationsAll(
         searchTerm: String
     ) {
-        ForvoPronunciation.wordPronunciationsAll(
+        pronunciationRepository
+        .wordPronunciationsAll(
             word = searchTerm,
             interfaceLanguageCode = UserLanguages.ENGLISH.code
         ) {
@@ -94,4 +101,19 @@ class PronunciationsViewModel(
 data class LanguageSelected(
     val name: String,
     var selected: Boolean
+)
+
+fun pronunciationsRepositoryImpl(application: Application) = PronunciationsRepositoryImpl(
+    forvoService = Retrofit.Builder()
+        // FIXME: Make that part more modular to plug with other remote data sources!
+        .baseUrl(ForvoService.BASE_URL)
+        .addConverterFactory(
+            GsonConverterFactory.create(
+                GsonBuilder()
+                    .registerTypeAdapter(Item::class.java, P())
+                    .create()
+            ))
+        .build()
+        .create(ForvoService::class.java),
+    wordDao = WordDatabase.getDatabase(application).wordDao
 )

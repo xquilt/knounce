@@ -7,7 +7,7 @@ import com.polendina.knounce.data.database.Word
 import com.polendina.knounce.domain.model.Pronunciations
 import kotlinx.coroutines.Job
 
-interface FloatingBubbleViewModel: Database {
+interface FloatingBubbleViewModel {
     var srcWord: TextFieldValue
     var targetWordDisplay: String
     var expanded: Boolean
