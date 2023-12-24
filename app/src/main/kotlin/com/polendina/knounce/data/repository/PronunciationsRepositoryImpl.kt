@@ -1,20 +1,23 @@
 package com.polendina.knounce.data.repository
 
+import androidx.lifecycle.LiveData
 import com.polendina.knounce.data.database.Word
-import com.polendina.knounce.data.database.WordDao
+import com.polendina.knounce.data.database.WordDatabase
 import com.polendina.knounce.data.network.ForvoService
 import com.polendina.knounce.domain.model.FromToResponse
 import com.polendina.knounce.domain.model.LanguageCodes
 import com.polendina.knounce.domain.model.Pronunciations
 import com.polendina.knounce.domain.model.UserLanguages
 import com.polendina.knounce.domain.repository.PronunciationsRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class PronunciationsRepositoryImpl(
     private val forvoService: ForvoService,
-    private val wordDao: WordDao
+    private val wordDatabase: WordDatabase
 ): PronunciationsRepository {
     override fun languageCodes(callback: (response: LanguageCodes?) -> Unit) {
         forvoService.languageCodes(UserLanguages.ENGLISH.code).enqueue(object: Callback<LanguageCodes> {
@@ -50,6 +53,7 @@ class PronunciationsRepositoryImpl(
         interfaceLanguageCode: String,
         callback: (pronunciations: Pronunciations?) -> Unit
     ) {
+        // TODO: Hit the local database first before attempting to load the word from the remote network/or the vice versa (if there's no internet connection)!
         forvoService.wordPronunciationsAll(
             word = word,
             interfaceLanguageCode = interfaceLanguageCode
@@ -150,7 +154,18 @@ class PronunciationsRepositoryImpl(
             }
         })
     }
-    override suspend fun loadWordsOfflineFirst(): List<Word> {
-        return wordDao.getWords()
+    override suspend fun loadWords() {
+        // TODO: Implement a remote repository solution to save the data to the cloud, then populate the local database with them!
+        forvoService.languageCodes(languageCode = "en").execute()
     }
+//    suspend fun updateLocalWords() {
+//        wordDatabase
+//            .wordDao.getWords()
+//            .map { it.title }
+//            // TODO: Want to refactor this implementation to sent multiple concurrent requests, and then update each respective local word accordingly!
+//            .forEach {
+//                forvoService.searchTranslation(word = )
+//            }
+//    }
+    override val words: LiveData<List<Word>> = wordDatabase.wordDao.getWords()
 }

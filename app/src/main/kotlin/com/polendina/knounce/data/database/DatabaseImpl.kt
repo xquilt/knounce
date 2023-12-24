@@ -2,6 +2,7 @@ package com.polendina.knounce.data.database
 
 import android.app.Application
 import androidx.compose.runtime.toMutableStateList
+import androidx.lifecycle.LiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,14 +19,16 @@ class DatabaseImpl (
      *
      * @return Return a List of Words.
      */
-    override suspend fun loadWordsFromDb(): List<Word> = wordDao.getWords().map {
-        Word(
-            title = it.title,
-            translation = it.translation,
-            pronunciations = it.pronunciations?.toMutableStateList(),
-            loaded = it.loaded
-        )
-    }
+    override suspend fun loadWordsFromDb(): LiveData<List<Word>> = wordDao.getWords()
+    // TODO: Maybe that logic can be encapsulated to a separate extension function!
+//        .map {
+//            Word(
+//                title = it.title,
+//                translation = it.translation,
+//                pronunciations = it.pronunciations?.toMutableStateList(),
+//                loaded = it.loaded
+//            )
+//        }
 
     override fun insertWordToDb(word: Word) = ioScope.launch {
         wordDao.insertWord(Word(

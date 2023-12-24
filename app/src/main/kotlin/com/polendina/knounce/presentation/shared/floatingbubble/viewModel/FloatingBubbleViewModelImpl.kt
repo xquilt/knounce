@@ -1,6 +1,7 @@
 package com.polendina.knounce.presentation.shared.floatingbubble
 
 import android.app.Application
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -10,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.polendina.knounce.PronunciationPlayer
@@ -21,13 +23,15 @@ import com.polendina.knounce.domain.repository.PronunciationsRepository
 import com.polendina.knounce.presentation.shared.floatingbubble.viewModel.FloatingBubbleViewModel
 import com.polendina.knounce.utils.refine
 import com.polendina.knounce.utils.swap
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.bush.translator.Language
 import me.bush.translator.Translator
 import java.io.IOException
 import java.net.SocketTimeoutException
+import java.nio.channels.UnresolvedAddressException
 
 class FloatingBubbleViewModelImpl(
     private val application: Application,
@@ -41,7 +45,9 @@ class FloatingBubbleViewModelImpl(
     // FIXME: Failed attempted to access the clipboard from within the View model
 //    val clipboardManager = application.getSystemService(Service.CLIPBOARD_SERVICE) as ClipboardManager
 //    private val clipboardContent = clipboardManager.primaryClip?.getItemAt(0)?.text.toString()
-    override val words = mutableStateListOf<Word>()
+    private val _words: LiveData<List<Word>> = pronunciationsRepository.words
+    // TODO: I'm not sure if this is the right way to go about saving the words (transforming them from LiveData to MutableState)
+    override val words = _words.value?.toMutableStateList() ?: mutableStateListOf()
     override var currentWord by mutableStateOf(Word())
     override var pageIndex by mutableIntStateOf(words.size)
 
@@ -176,14 +182,24 @@ class FloatingBubbleViewModelImpl(
         viewModelScope.cancel()
     }
 
-    suspend fun loadWordsFromDb(): List<Word> = pronunciationsRepository.loadWordsOfflineFirst()
+    private fun refreshWords() = viewModelScope.launch {
+        try {
+            withContext(Dispatchers.IO) {
+                pronunciationsRepository.loadWords()
+            }
+            Log.d("Success!", "Hello world!")
+        } catch (networkException: IOException) {
+            // TODO: Show any form of an indication to the user!
+            Log.e("NetworkError", networkException.message.toString())
+        }
+    }
 
 //    override fun insertWordToDb(word: Word): Job = database.insertWordToDb(word)
 //
 //    override fun removeWordFromDb(wordTitle: String): Job = database.removeWordFromDb(wordTitle)
     init {
         viewModelScope.launch {
-            words.addAll(pronunciationsRepository.loadWordsOfflineFirst())
+            refreshWords()
         }
     }
 

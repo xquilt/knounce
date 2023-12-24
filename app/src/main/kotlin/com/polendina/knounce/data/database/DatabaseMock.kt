@@ -1,5 +1,7 @@
 package com.polendina.knounce.data.database
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -57,7 +59,7 @@ class DatabaseMock(
             )
         }
     private val ioScope = CoroutineScope(Dispatchers.IO)
-    override suspend fun loadWordsFromDb(): List<Word> = _words
+    override suspend fun loadWordsFromDb(): LiveData<List<Word>> = MutableLiveData(_words)
 
     override fun insertWordToDb(word: Word): Job = ioScope.launch {}
 

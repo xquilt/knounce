@@ -77,6 +77,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     // ViewModel utilities for Compose
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    // LiveData
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
+
 
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(platform(libs.compose.bom))

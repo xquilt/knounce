@@ -115,5 +115,5 @@ fun pronunciationsRepositoryImpl(application: Application) = PronunciationsRepos
             ))
         .build()
         .create(ForvoService::class.java),
-    wordDao = WordDatabase.getDatabase(application).wordDao
+    wordDatabase = WordDatabase.getDatabase(application)
 )

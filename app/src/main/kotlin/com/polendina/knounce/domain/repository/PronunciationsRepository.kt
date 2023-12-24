@@ -1,5 +1,6 @@
 package com.polendina.knounce.domain.repository
 
+import androidx.lifecycle.LiveData
 import com.polendina.knounce.data.database.Word
 import com.polendina.knounce.domain.model.FromToResponse
 import com.polendina.knounce.domain.model.LanguageCodes
@@ -63,7 +64,11 @@ interface PronunciationsRepository {
     /**
      *
      * @param word The word to look up
-     * @return Return the locally saved/cached word, or else return null
     */
-    suspend fun loadWordsOfflineFirst(): List<Word>
+    suspend fun loadWords()
+    /**
+     *
+     * The remotely fetched words or the locally saved/cached words.
+    */
+    val words: LiveData<List<Word>>
 }
