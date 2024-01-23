@@ -63,7 +63,9 @@ dependencies {
     implementation(libs.ui)
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
-    implementation("androidx.compose.material:material:1.5.0")
+    implementation(libs.androidx.junit.ktx)
+    val compose_version = "1.5.0"
+    implementation("androidx.compose.material:material:${compose_version}")
 //    implementation(libs.material3)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.runtime.ktx)
@@ -79,7 +81,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     // LiveData
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
-
+    implementation("androidx.compose.runtime:runtime-livedata:${compose_version}")
 
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(platform(libs.compose.bom))
@@ -100,12 +102,16 @@ dependencies {
 //    testImplementation(libs.junit)
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
-//    androidTestImplementation(libs.androidx.test.ext.junit)
 //    androidTestImplementation(libs.ui.test.junit4)
     testImplementation("org.robolectric:robolectric:4.10.3")
     testImplementation("org.mockito:mockito-core:5.6.0")
     testImplementation("androidx.arch.core:core-testing:2.2.0")
     testImplementation("org.robolectric:robolectric:4.10.3")
+    // Instrumentation testing
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("androidx.test:rules:1.5.0")
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
 
     // Room database
     version = "2.5.2"
@@ -117,9 +123,6 @@ dependencies {
 
     // Coroutines Testing
     androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-
-    androidTestImplementation("androidx.test:runner:1.5.2")
-    androidTestImplementation("androidx.test:rules:1.5.0")
 
     implementation("com.valentinilk.shimmer:compose-shimmer:1.2.0")
 }
