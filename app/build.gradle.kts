@@ -46,7 +46,11 @@ android {
     }
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes.addAll(listOf(
+                "/META-INF/{AL2.0,LGPL2.1}",
+                "/META-INF/DEPENDENCIES",
+                "mozilla/public-suffix-list.txt"
+            ))
         }
     }
     testOptions {
@@ -113,6 +117,12 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
 
+    // Skrapeit
+    val skrapeIt = "1.3.0-alpha.1"
+    implementation("it.skrape:skrapeit:$skrapeIt") { isChanging = true }
+    implementation("it.skrape:skrapeit-http-fetcher:$skrapeIt")
+    implementation("it.skrape:skrapeit-async-fetcher:$skrapeIt")
+
     // Room database
     version = "2.5.2"
     implementation("androidx.room:room-ktx:$version")
@@ -125,6 +135,7 @@ dependencies {
     androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 
     implementation("com.valentinilk.shimmer:compose-shimmer:1.2.0")
+
 }
 
 //tasks.withType<Test> {
