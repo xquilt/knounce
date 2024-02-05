@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -17,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import com.polendina.knounce.data.database.DatabaseMock
 import com.polendina.knounce.data.database.Word
 import com.polendina.knounce.presentation.flashcard.viewmodel.FlashCardViewModelMock
-import com.polendina.knounce.presentation.shared.CustomSearchBar
 
 @Composable
 fun HistoryItems(
@@ -25,19 +25,16 @@ fun HistoryItems(
     modifier: Modifier = Modifier
 ) {
     var query by remember { mutableStateOf("") }
+    var count by remember { mutableIntStateOf(words.size) }
     Scaffold (
         topBar = {
-             CustomSearchBar(
-                 query = query,
-                 onQueryChange = {
-                     query = it
-                 },
-                 onActiveChange = {},
-                 onSearch = {},
-                 onClearText = {
-                     query = ""
-                 }
-             )
+            HistoryScreenTopBar(
+                searchQuery = query,
+                onSearchQueryChange = { query = it },
+                moreCallback = {},
+                count = count,
+                navigateCallback = {}
+            )
         },
         modifier = modifier
     ) {
@@ -47,7 +44,10 @@ fun HistoryItems(
                 .padding(it)
         ) {
             items(items = words) {
-                HistoryItem(it)
+                HistoryItem(
+                   word = it,
+                    moreCallback = { }
+                )
             }
         }
     }
@@ -63,7 +63,7 @@ fun HistoryItemsPreview(
         words = FlashCardViewModelMock(database = DatabaseMock()).words,
         modifier = Modifier
             .padding(
-                vertical = 20.dp,
+//                vertical = 20.dp,
                 horizontal = 5.dp
             )
     )

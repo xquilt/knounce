@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Knounce</string>
     <string name="translation">Translation</string>
+    <string name="translations">translations</string>
     <string name="search">Search</string>
     <string name="no_network_interface">No Network Connection</string>
     <string name="no_network_connection_description">You are not connected to the internet. Make sure Wi-Fi is on, Airplane Mode is off and try again</string>
@@ -17,4 +18,5 @@
     <string name="enter_text">Enter text</string>
     <string name="notification_title">"Tap To Translate" is activated</string>
     <string name="notification_text">Tap on notification in order to open the popup</string>
+    <string name="history">History</string>
 </resources>
