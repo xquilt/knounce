@@ -3,7 +3,6 @@ package com.polendina.knounce.presentation.shared.floatingbubble
 import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.test.core.app.ApplicationProvider
 import com.polendina.knounce.data.database.Word
 import com.polendina.knounce.presentation.pronunciationsscreen.pronunciationsRepositoryImpl
 import com.polendina.knounce.utils.refine
@@ -126,18 +125,15 @@ class FloatingBubbleViewModelImplTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun loadPronunciations() = runTest(timeout = Duration.INFINITE) {
-        germanWords.subList(0, 1).forEach {
-            println(it.title)
+    fun `test whether word pronunciations are correctly loaded`() = runTest(timeout = Duration.INFINITE) {
+        germanWords.take(1).forEachIndexed { index, word ->
+            println(word.title)
 //            floatingBubbleViewModel.srcWord = TextFieldValue(it.title)
-            floatingBubbleViewModelImpl.currentWord = it
-            floatingBubbleViewModelImpl.loadPronunciations(word = it.title).join()
-            germanWords.take(1).forEachIndexed { index, word ->
-                floatingBubbleViewModelImpl.searchWord(word.title)
-                floatingBubbleViewModelImpl.loadPronunciations(word.title)
-            }
+            floatingBubbleViewModelImpl.currentWord = word
+            floatingBubbleViewModelImpl.loadPronunciations(word = word.title)
         }
         advanceUntilIdle()
+        println(floatingBubbleViewModelImpl.words.map { it.pronunciations })
         assert(
             floatingBubbleViewModelImpl.words.map { it.pronunciations?.take(3)?.toList() } ==
                     germanWords.take(1).map { it.pronunciations?.take(3)?.toList() }
@@ -145,8 +141,16 @@ class FloatingBubbleViewModelImplTest {
     }
 
     @Test
+    fun `test grabbing audio file over the network`() = runTest {
+        val pronunciations = germanWords.take(1).map { word ->
+            floatingBubbleViewModelImpl.grabAudioFiles(searchTerm = word.title)
+        }
+        println(pronunciations)
+    }
+
+    @Test
     fun searchWordTest() = runTest {
-        germanWords.map { it.title }.forEach {
+        germanWords.take(1).map { it.title }.forEach {
             floatingBubbleViewModelImpl.searchWord(it)
         }
         assert(
@@ -157,14 +161,15 @@ class FloatingBubbleViewModelImplTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun loadWordsFromDbTest() = runTest {
-        germanWords.forEach {
-            floatingBubbleViewModelImpl.searchWord(it.title)
-            println(floatingBubbleViewModelImpl.currentWord.title)
-//            floatingBubbleViewModelImpl.insertWordToDb(floatingBubbleViewModelImpl.currentWord)
-        }
+    fun loadWords() = runTest {
+        germanWords
+            .take(3)
+            .forEach {
+                floatingBubbleViewModelImpl.searchWord(it.title)
+                println(floatingBubbleViewModelImpl.currentWord.title)
+            }
         advanceUntilIdle()
-        println(floatingBubbleViewModelImpl.loadWordsFromDb().map { it.title })
+        println(floatingBubbleViewModelImpl.words.map { it.title })
     }
 
 }

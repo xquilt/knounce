@@ -11,7 +11,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.polendina.knounce.PronunciationPlayer
@@ -25,13 +24,15 @@ import com.polendina.knounce.utils.refine
 import com.polendina.knounce.utils.swap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.bush.translator.Language
 import me.bush.translator.Translator
 import java.io.IOException
 import java.net.SocketTimeoutException
-import java.nio.channels.UnresolvedAddressException
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class FloatingBubbleViewModelImpl(
     private val application: Application,
@@ -45,9 +46,9 @@ class FloatingBubbleViewModelImpl(
     // FIXME: Failed attempted to access the clipboard from within the View model
 //    val clipboardManager = application.getSystemService(Service.CLIPBOARD_SERVICE) as ClipboardManager
 //    private val clipboardContent = clipboardManager.primaryClip?.getItemAt(0)?.text.toString()
-    private val _words: LiveData<List<Word>> = pronunciationsRepository.words
     // TODO: I'm not sure if this is the right way to go about saving the words (transforming them from LiveData to MutableState)
-    override val words = _words.value?.toMutableStateList() ?: mutableStateListOf()
+//    override val words: LiveData<List<Word>>
+    override val words: MutableList<Word> = pronunciationsRepository.words.value?.toMutableStateList() ?: mutableStateListOf()
     override var currentWord by mutableStateOf(Word())
     override var pageIndex by mutableIntStateOf(words.size)
 
@@ -72,23 +73,27 @@ class FloatingBubbleViewModelImpl(
         // Instantly add a Word synchronously, to avoid unnecessary null checks and race conditions with translation & pronunciations network requests.
         if (word.isBlank()) return
         val insertIndex = if (words.size == 0) 0 else pageIndex + 1
-        words.find { it.title == word }.let {
-            if (it == null) {
+        words.find { it.title == word }.let { foundWord ->
+            if (foundWord == null) {
                 words.add(index = insertIndex, Word(title = word))
                 pageIndex = insertIndex
                 currentWord = words[insertIndex]
                 expanded = true
                 try {
-                    translateWord(word = currentWord.title)
-                    loadPronunciations(word = currentWord.title)
+                    viewModelScope.launch {
+                        translateWord(word = currentWord.title)
+                        withContext(Dispatchers.IO) {
+                            loadPronunciations(word = currentWord.title)
+                        }
+                    }
                 } catch (e: SocketTimeoutException) {
                     e.printStackTrace(); println(e.cause)
                 } catch (_: IOException) {}
             } else {
                 // Maintain whichever the current page/word as the previous page when navigating between various indices.
-                if (pageIndex != words.indexOf(it)) words.swap(pageIndex + 1, words.indexOf(it))
-                currentWord = it
-                pageIndex = words.indexOf(it)
+                if (pageIndex != words.indexOf(foundWord)) words.swap(pageIndex + 1, words.indexOf(foundWord))
+                currentWord = foundWord
+                pageIndex = words.indexOf(foundWord)
                 expanded = true
             }
         }
@@ -99,7 +104,7 @@ class FloatingBubbleViewModelImpl(
      *
      */
     // TODO: Add the ability to display auto-corrections for malformed words inputted by the user.
-    override fun translateWord(word: String) = viewModelScope.launch {
+    override suspend fun translateWord(word: String) {
         Translator().translate(
             text = word,
             source = Language.GERMAN,
@@ -127,16 +132,14 @@ class FloatingBubbleViewModelImpl(
      * @param searchTerm The word to be pronounced.
      * @return Pronunciations object of the searched word.
      */
-    override suspend fun grabAudioFiles(searchTerm: String): Pronunciations? {
-        var returnValue: Pronunciations? = null
+    override suspend fun grabAudioFiles(searchTerm: String): Pronunciations? = suspendCoroutine { continuation ->
         pronunciationsRepository.wordPronunciations(
             word = searchTerm.refine(),
             interfaceLanguageCode = UserLanguages.ENGLISH.code,
             languageCode = FORVO_LANGUAGE.GERMAN.code
-        ) {
-            returnValue = it
+        ) { pronunciations ->
+            continuation.resume(value = pronunciations)
         }
-        return (returnValue)
     }
 
     /**
@@ -144,22 +147,24 @@ class FloatingBubbleViewModelImpl(
      *
      * @param searchTerm The desired word to be pronounced.
      */
-    override fun loadPronunciations(word: String) = viewModelScope.launch {
-        grabAudioFiles(searchTerm = word).let {
-            it?.data?.forEach {
+    override suspend fun loadPronunciations(word: String) {
+        grabAudioFiles(searchTerm = word).let { pronunciations ->
+            println(pronunciations)
+            pronunciations?.data?.forEach {
                 currentWord.copy(
-                    pronunciations = it.items.map {
-                        it.original to
+                    pronunciations = it.items.map { item ->
+                        item.original to
                         Gson().fromJson(
-                            it.standard_pronunciation,
+                            item.standard_pronunciation,
                             Item.StandardPronunciation::class.java
                         ).realmp3
                     }.toMutableStateList()
-                ).let {
-                    currentWord = it
-                    words[pageIndex] = it
+                ).let { word ->
+                    currentWord = word
+                    words[pageIndex] = word
                 }
             }
+            pronunciationsRepository.loadWords()
         }
     }
 
@@ -168,38 +173,51 @@ class FloatingBubbleViewModelImpl(
      *
      * @param searchTerm The word to play its pronunciation.
     */
-    override fun playAudio(searchTerm: String) = currentWord
-        .pronunciations
-        ?.find { it.first == searchTerm }
-        ?.let {
-            viewModelScope.launch {
+    override fun playAudio(searchTerm: String) = viewModelScope.launch {
+        currentWord.pronunciations
+            ?.find { it.first == searchTerm }
+            ?.let {
                 PronunciationPlayer.playRemoteAudio(it.second)
             }
-        }
+    }
 
     override fun onCleared() {
         super.onCleared()
         viewModelScope.cancel()
     }
 
-    private fun refreshWords() = viewModelScope.launch {
-        try {
+    private suspend fun refreshWords() = runCatching {
+        pronunciationsRepository.loadWords()
+    }
+
+    override fun insertWord(word: Word) = viewModelScope.launch {
+        pronunciationsRepository.insertWord(word)
+    }
+
+    override fun removeWord(wordTitle: String) = viewModelScope.launch {
+        pronunciationsRepository.removeWord(wordTitle)
+    }
+
+    init {
+        viewModelScope.launch {
+//            withContext(Dispatchers.IO) { }
+            refreshWords()
+                .onFailure {
+                    // TODO: Show any form of an indication to the user!
+                    if (it is IOException) { // TODO: The previous implementation relied on IOException
+                        Log.e("NetworkError", it.message.toString())
+                    }
+                }
+                .onSuccess {
+                    Log.d("Success!", "Hello world!")
+                }
+            Log.d("Value", pronunciationsRepository.words.value.toString())
+            delay(5000)
+            Log.d("Value", pronunciationsRepository.words.value.toString())
+            delay(5000)
             withContext(Dispatchers.IO) {
                 pronunciationsRepository.loadWords()
             }
-            Log.d("Success!", "Hello world!")
-        } catch (networkException: IOException) {
-            // TODO: Show any form of an indication to the user!
-            Log.e("NetworkError", networkException.message.toString())
-        }
-    }
-
-//    override fun insertWordToDb(word: Word): Job = database.insertWordToDb(word)
-//
-//    override fun removeWordFromDb(wordTitle: String): Job = database.removeWordFromDb(wordTitle)
-    init {
-        viewModelScope.launch {
-            refreshWords()
         }
     }
 
