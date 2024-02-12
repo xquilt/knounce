@@ -18,7 +18,7 @@ import com.polendina.knounce.data.database.Word
 import com.polendina.knounce.domain.model.Item
 import com.polendina.knounce.domain.model.Pronunciations
 import com.polendina.knounce.domain.model.UserLanguages
-import com.polendina.knounce.domain.repository.PronunciationsRepository
+import com.polendina.knounce.domain.repository.KnounceRepository
 import com.polendina.knounce.presentation.shared.floatingbubble.viewModel.FloatingBubbleViewModel
 import com.polendina.knounce.utils.refine
 import com.polendina.knounce.utils.swap
@@ -31,12 +31,10 @@ import me.bush.translator.Language
 import me.bush.translator.Translator
 import java.io.IOException
 import java.net.SocketTimeoutException
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class FloatingBubbleViewModelImpl(
     private val application: Application,
-    private val pronunciationsRepository: PronunciationsRepository
+    private val knounceRepository: KnounceRepository
 ) : AndroidViewModel(application), FloatingBubbleViewModel {
     override var srcWord by mutableStateOf(TextFieldValue(""))
     override var targetWordDisplay by mutableStateOf("")
@@ -48,7 +46,7 @@ class FloatingBubbleViewModelImpl(
 //    private val clipboardContent = clipboardManager.primaryClip?.getItemAt(0)?.text.toString()
     // TODO: I'm not sure if this is the right way to go about saving the words (transforming them from LiveData to MutableState)
 //    override val words: LiveData<List<Word>>
-    override val words: MutableList<Word> = pronunciationsRepository.words.value?.toMutableStateList() ?: mutableStateListOf()
+    override val words: MutableList<Word> by lazy { knounceRepository.words.toMutableStateList() }
     override var currentWord by mutableStateOf(Word())
     override var pageIndex by mutableIntStateOf(words.size)
 
@@ -132,15 +130,12 @@ class FloatingBubbleViewModelImpl(
      * @param searchTerm The word to be pronounced.
      * @return Pronunciations object of the searched word.
      */
-    override suspend fun grabAudioFiles(searchTerm: String): Pronunciations? = suspendCoroutine { continuation ->
-        pronunciationsRepository.wordPronunciations(
+    override suspend fun grabAudioFiles(searchTerm: String): Pronunciations? =
+        knounceRepository.wordPronunciations(
             word = searchTerm.refine(),
             interfaceLanguageCode = UserLanguages.ENGLISH.code,
             languageCode = FORVO_LANGUAGE.GERMAN.code
-        ) { pronunciations ->
-            continuation.resume(value = pronunciations)
-        }
-    }
+        )
 
     /**
      * If the word pronunciations aren't already loaded, then simply retrieve and append them.
@@ -152,7 +147,7 @@ class FloatingBubbleViewModelImpl(
             println(pronunciations)
             pronunciations?.data?.forEach {
                 currentWord.copy(
-                    pronunciations = it.items.map { item ->
+                    pronunciations = it.items.filterNotNull().map { item ->
                         item.original to
                         Gson().fromJson(
                             item.standard_pronunciation,
@@ -164,7 +159,7 @@ class FloatingBubbleViewModelImpl(
                     words[pageIndex] = word
                 }
             }
-            pronunciationsRepository.loadWords()
+            knounceRepository.loadWords()
         }
     }
 
@@ -187,15 +182,15 @@ class FloatingBubbleViewModelImpl(
     }
 
     private suspend fun refreshWords() = runCatching {
-        pronunciationsRepository.loadWords()
+        knounceRepository.loadWords()
     }
 
     override fun insertWord(word: Word) = viewModelScope.launch {
-        pronunciationsRepository.insertWord(word)
+        knounceRepository.insertWord(word)
     }
 
     override fun removeWord(wordTitle: String) = viewModelScope.launch {
-        pronunciationsRepository.removeWord(wordTitle)
+        knounceRepository.removeWord(wordTitle)
     }
 
     init {
@@ -211,12 +206,13 @@ class FloatingBubbleViewModelImpl(
                 .onSuccess {
                     Log.d("Success!", "Hello world!")
                 }
-            Log.d("Value", pronunciationsRepository.words.value.toString())
+            Log.d("Value", knounceRepository.words.toString())
             delay(5000)
-            Log.d("Value", pronunciationsRepository.words.value.toString())
+            Log.d("Value", knounceRepository.words.toString())
             delay(5000)
             withContext(Dispatchers.IO) {
-                pronunciationsRepository.loadWords()
+                // TODO: I should make a UI distinction between the user having no saved words/something went wrong over the network/database i.e., IO call
+                words.addAll(knounceRepository.loadWords() ?: emptyList())
             }
         }
     }

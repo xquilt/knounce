@@ -19,7 +19,7 @@ class DatabaseImpl (
      *
      * @return Return a List of Words.
      */
-    override suspend fun loadWordsFromDb(): LiveData<List<Word>> = wordDao.getWords()
+    override suspend fun loadWordsFromDb(): List<Word> = wordDao.getWords()
     // TODO: Maybe that logic can be encapsulated to a separate extension function!
 //        .map {
 //            Word(

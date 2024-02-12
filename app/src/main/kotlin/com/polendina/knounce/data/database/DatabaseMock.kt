@@ -59,7 +59,7 @@ class DatabaseMock(
             )
         }
     private val ioScope = CoroutineScope(Dispatchers.IO)
-    override suspend fun loadWordsFromDb(): LiveData<List<Word>> = MutableLiveData(_words)
+    override suspend fun loadWordsFromDb(): List<Word> = _words
 
     override fun insertWordToDb(word: Word): Job = ioScope.launch {}
 

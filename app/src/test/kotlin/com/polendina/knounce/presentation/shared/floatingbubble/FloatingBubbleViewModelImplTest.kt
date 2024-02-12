@@ -97,7 +97,7 @@ class FloatingBubbleViewModelImplTest {
         application = RuntimeEnvironment.getApplication()
         floatingBubbleViewModelImpl = FloatingBubbleViewModelImpl(
             application = application,
-            pronunciationsRepository = pronunciationsRepositoryImpl(application = application)
+            knounceRepository = pronunciationsRepositoryImpl(application = application)
         )
     }
 
@@ -114,7 +114,7 @@ class FloatingBubbleViewModelImplTest {
                 floatingBubbleViewModelImpl.words.add(it)
                 floatingBubbleViewModelImpl.currentWord = it
             }
-            floatingBubbleViewModelImpl.translateWord(floatingBubbleViewModelImpl.currentWord.title).join()
+            floatingBubbleViewModelImpl.translateWord(floatingBubbleViewModelImpl.currentWord.title)
         }
         advanceUntilIdle()
         assert(

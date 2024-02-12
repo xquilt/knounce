@@ -16,9 +16,9 @@ import kotlinx.coroutines.runBlocking
 class FlashCardViewModelMock(
     private val database: Database
 ): FlashCardViewModel, ViewModel(), Database {
-    override val words: SnapshotStateList<Word> = runBlocking { database.loadWordsFromDb().value?.toMutableStateList() ?: emptyList<Word>().toMutableStateList() }
+    override val words: SnapshotStateList<Word> = runBlocking { database.loadWordsFromDb().toMutableStateList() ?: emptyList<Word>().toMutableStateList() }
     override fun insertWordToDb(word: Word): Job = database.insertWordToDb(word = word)
-    override suspend fun loadWordsFromDb(): LiveData<List<Word>> = database.loadWordsFromDb()
+    override suspend fun loadWordsFromDb(): List<Word> = database.loadWordsFromDb()
     override fun removeWordFromDb(wordTitle: String): Job = database.removeWordFromDb(wordTitle = wordTitle)
     override var elapsedSeconds by mutableLongStateOf(listOf(0L, 2034L, 60234L, 2342324234L).random())
     init {

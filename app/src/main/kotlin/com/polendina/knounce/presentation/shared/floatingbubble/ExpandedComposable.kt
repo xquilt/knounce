@@ -98,7 +98,7 @@ fun ExpandedCompose(
                         },
                         addWordCallback = {
                             floatingBubbleViewModel.currentWord.let {
-//                                if (it.loaded) floatingBubbleViewModel.removeWordFromDb(wordTitle = it.title) else floatingBubbleViewModel.insertWordToDb(it)
+                                if (it.loaded) floatingBubbleViewModel.removeWord(word = it.title) else floatingBubbleViewModel.insertWord(word = it)
                                 floatingBubbleViewModel.invertLoaded()
                             }
                         },

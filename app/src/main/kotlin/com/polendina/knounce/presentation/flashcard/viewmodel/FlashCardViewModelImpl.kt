@@ -24,7 +24,7 @@ class FlashCardViewModelImpl(
     }
 
     override fun insertWordToDb(word: Word): Job = database.insertWordToDb(word = word)
-    override suspend fun loadWordsFromDb(): LiveData<List<Word>> = database.loadWordsFromDb()
+    override suspend fun loadWordsFromDb(): List<Word> = database.loadWordsFromDb()
     override fun removeWordFromDb(wordTitle: String): Job =
         database.removeWordFromDb(wordTitle = wordTitle)
 

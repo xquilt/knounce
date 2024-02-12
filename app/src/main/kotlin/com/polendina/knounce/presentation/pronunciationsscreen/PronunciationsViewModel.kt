@@ -7,30 +7,28 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.polendina.knounce.PronunciationPlayer
 import com.polendina.knounce.data.database.WordDatabase
 import com.polendina.knounce.data.network.ForvoService
-import com.polendina.knounce.data.repository.PronunciationsRepositoryImpl
+import com.polendina.knounce.data.repository.KnounceRepositoryImpl
 import com.polendina.knounce.domain.model.Item
 import com.polendina.knounce.domain.model.Pronunciations
 import com.polendina.knounce.domain.model.UserLanguages
-import com.polendina.knounce.domain.repository.PronunciationsRepository
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import trancore.corelib.pronunciation.P
+import com.polendina.knounce.domain.repository.KnounceRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class PronunciationsViewModel(
     private val application: Application = Application(),
-    private val pronunciationRepository: PronunciationsRepository // its methods were getting skipped over when called down below
+    private val knounceRepository: KnounceRepository // its methods were getting skipped over when called down below
 ): AndroidViewModel(application) {
 
     // Expose screen UI state
     var query = mutableStateOf("")
         private set
     val languages = mutableStateListOf<Pronunciations.Datum>()
-    private val _languages = mutableStateListOf<String>("Arabic", "English", "French", "Spanish", "Interlingua")
     val highlightedLanguages = mutableStateListOf<LanguageSelected>()
     var networkConnected = false
         get() = NetworkHandler(context = application).isNetworkAvailable()
@@ -57,20 +55,19 @@ class PronunciationsViewModel(
      *
      * @param searchTerm The search term to be used.
     */
-    fun wordPronunciationsAll(
-        searchTerm: String
-    ) {
-        pronunciationRepository
-        .wordPronunciationsAll(
-            word = searchTerm,
-            interfaceLanguageCode = UserLanguages.ENGLISH.code
-        ) {
-            it?.apply {
+    fun wordPronunciations(searchTerm: String) = viewModelScope.launch(Dispatchers.IO) {
+        knounceRepository
+            .wordPronunciations(
+                word = searchTerm,
+                languageCode = UserLanguages.ENGLISH.code,
+                interfaceLanguageCode = UserLanguages.ENGLISH.code
+            )?.let { // TODO:  I should make a distinctive UI widgets for different cases of data being correctly loaded/actually empty
                 updateLanguagesList(it)
                 highlightedLanguages.clear()
-                highlightedLanguages.addAll(languages.map { LanguageSelected(it.language, false) })
+                highlightedLanguages.addAll(languages.map {
+                    LanguageSelected(it.language, false)
+                })
             }
-        }
     }
 
     fun filterPronunciations(
@@ -103,17 +100,7 @@ data class LanguageSelected(
     var selected: Boolean
 )
 
-fun pronunciationsRepositoryImpl(application: Application) = PronunciationsRepositoryImpl(
-    forvoService = Retrofit.Builder()
-        // FIXME: Make that part more modular to plug with other remote data sources!
-        .baseUrl(ForvoService.BASE_URL)
-        .addConverterFactory(
-            GsonConverterFactory.create(
-                GsonBuilder()
-                    .registerTypeAdapter(Item::class.java, P())
-                    .create()
-            ))
-        .build()
-        .create(ForvoService::class.java),
-    wordDatabase = WordDatabase.getDatabase(application)
+fun pronunciationsRepositoryImpl(application: Application) = KnounceRepositoryImpl(
+    forvoService = ForvoService,
+    wordDatabase = WordDatabase.getDatabase(context = application.applicationContext)
 )

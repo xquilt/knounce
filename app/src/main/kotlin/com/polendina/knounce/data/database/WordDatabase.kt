@@ -25,7 +25,7 @@ abstract class WordDatabase: RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context = context,
                     klass = WordDatabase::class.java,
-                    name = "words"
+                    name = "word"
                 )
                 .build()
                 INSTANCE = instance

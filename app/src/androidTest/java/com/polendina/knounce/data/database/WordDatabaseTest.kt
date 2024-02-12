@@ -36,7 +36,7 @@ class WordDatabaseTest {
         wordDao.deleteWord("nicht")
         assertEquals(
             listOf("nich"),
-            wordDao.getWords().map { it.title }
+            wordDao.getWords().value?.map { it.title }
         )
     }
 

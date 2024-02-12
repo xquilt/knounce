@@ -12,5 +12,5 @@ interface WordDao {
     @Query("DELETE FROM word WHERE word.title = :word")
     suspend fun deleteWord(word: String)
     @Query("SELECT * FROM word")
-    fun getWords(): LiveData<List<Word>>
+    fun getWords(): List<Word>
 }

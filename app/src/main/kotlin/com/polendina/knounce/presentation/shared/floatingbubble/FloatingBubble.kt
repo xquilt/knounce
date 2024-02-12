@@ -8,7 +8,6 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.app.NotificationCompat
 import com.polendina.knounce.R
-import com.polendina.knounce.data.database.DatabaseImpl
 import com.polendina.knounce.presentation.pronunciationsscreen.pronunciationsRepositoryImpl
 import com.torrydo.floatingbubbleview.CloseBubbleBehavior
 import com.torrydo.floatingbubbleview.FloatingBubbleListener
@@ -26,7 +25,7 @@ class FloatingBubbleService(
         val clipboardManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         floatingBubbleViewModel = FloatingBubbleViewModelImpl(
             application = application,
-            pronunciationsRepository = pronunciationsRepositoryImpl(application = application)
+            knounceRepository = pronunciationsRepositoryImpl(application = application)
         )  // TODO: having the viewModel instantiated here, because I wanted to access the System clipboard service, to get the copied text (I couldn't access the CLIPBOARD_SERVICE from within the viewModel).
         clipboardManager.addPrimaryClipChangedListener {
             val copiedString = clipboardManager.primaryClip?.getItemAt(0)?.text.toString()

@@ -10,7 +10,6 @@ import com.polendina.knounce.data.database.Database
 import com.polendina.knounce.data.database.Word
 import com.polendina.knounce.domain.model.Pronunciations
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.runBlocking
 
 class FloatingBubbleViewModelMock(
     private val database: Database
@@ -36,7 +35,7 @@ class FloatingBubbleViewModelMock(
         TODO("Not yet implemented")
     }
 
-    override fun translateWord(word: String): Job {
+    override suspend fun translateWord(word: String) {
         TODO("Not yet implemented")
     }
 
@@ -44,11 +43,19 @@ class FloatingBubbleViewModelMock(
         TODO("Not yet implemented")
     }
 
-    override fun loadPronunciations(word: String): Job {
+    override suspend fun loadPronunciations(word: String) {
         TODO("Not yet implemented")
     }
 
     override fun playAudio(searchTerm: String): Job? {
+        TODO("Not yet implemented")
+    }
+
+    override fun insertWord(word: Word): Job {
+        TODO("Not yet implemented")
+    }
+
+    override fun removeWord(word: String): Job {
         TODO("Not yet implemented")
     }
 }
