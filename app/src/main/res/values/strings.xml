@@ -19,4 +19,5 @@
     <string name="notification_title">"Tap To Translate" is activated</string>
     <string name="notification_text">Tap on notification in order to open the popup</string>
     <string name="history">History</string>
+    <string name="no_matches">No Matches were found</string>
 </resources>

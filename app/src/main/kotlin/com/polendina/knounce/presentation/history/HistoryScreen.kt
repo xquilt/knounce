@@ -1,51 +1,52 @@
 package com.polendina.knounce.presentation.history.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Text
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.polendina.knounce.data.database.DatabaseMock
-import com.polendina.knounce.data.database.Word
-import com.polendina.knounce.presentation.flashcard.viewmodel.FlashCardViewModelMock
+import com.polendina.knounce.R
+import com.polendina.knounce.presentation.history.HistoryScreenViewModel
+import com.polendina.knounce.presentation.history.HistoryScreenViewModelPreviewParameterProvider
 
 @Composable
-fun HistoryItems(
-    words: SnapshotStateList<Word>,
-    modifier: Modifier = Modifier
+fun HistoryScreen(
+    modifier: Modifier = Modifier,
+    historyScreenViewModel: HistoryScreenViewModel
 ) {
-    var query by remember { mutableStateOf("") }
-    var count by remember { mutableIntStateOf(words.size) }
     Scaffold (
         topBar = {
             HistoryScreenTopBar(
-                searchQuery = query,
-                onSearchQueryChange = { query = it },
+                searchQuery = historyScreenViewModel.query,
+                onSearchQueryChange = historyScreenViewModel::onSearchQuery,
                 moreCallback = {},
-                count = count,
+                count = historyScreenViewModel.words.size,
                 navigateCallback = {}
             )
         },
         modifier = modifier
     ) {
+        AnimatedVisibility(
+            visible = historyScreenViewModel.words.isEmpty()
+        ) {
+            Text(text = stringResource(id = R.string.no_matches))
+        }
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier
                 .padding(it)
         ) {
-            items(items = words) {
+            items(items = historyScreenViewModel.words) {
                 HistoryItem(
-                   word = it,
+                    word = it,
                     moreCallback = { }
                 )
             }
@@ -55,12 +56,15 @@ fun HistoryItems(
 
 @Preview(showBackground = true)
 @Composable
-fun HistoryItemsPreview(
-
+internal fun HistoryItemsPreview(
+    @PreviewParameter(
+        provider = HistoryScreenViewModelPreviewParameterProvider::class,
+        limit = 2
+    ) historyScreenViewModel: HistoryScreenViewModel
 ) {
-    HistoryItems(
+    HistoryScreen(
         // TODO: The following viewmodel should be renamed to something more appropriate.
-        words = FlashCardViewModelMock(database = DatabaseMock()).words,
+        historyScreenViewModel = historyScreenViewModel,
         modifier = Modifier
             .padding(
 //                vertical = 20.dp,
